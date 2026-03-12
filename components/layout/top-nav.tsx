@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 
 type TopNavProps = {
@@ -25,12 +23,18 @@ export default function TopNav({ title }: TopNavProps) {
           >
             View assignments
           </Link>
-          <button className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-sky-400 text-xs font-semibold text-neutral-950 shadow-sm">
-            AS
-          </button>
+          <form method="post" action="/auth/signout">
+            <button
+              type="submit"
+              className="flex h-8 items-center justify-center rounded-full border border-neutral-700 px-3 text-xs font-medium text-neutral-200 hover:border-neutral-500 hover:bg-neutral-900"
+            >
+              Sign out
+            </button>
+          </form>
         </div>
       </div>
     </header>
   );
 }
+
 

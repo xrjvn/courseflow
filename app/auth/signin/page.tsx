@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { signInAction } from "../actions";
 
 export default function SignInPage() {
   return (
@@ -18,7 +19,7 @@ export default function SignInPage() {
           </div>
         </div>
 
-        <form className="space-y-4">
+        <form className="space-y-4" action={signInAction}>
           <div className="space-y-1.5">
             <label
               htmlFor="email"
@@ -28,10 +29,12 @@ export default function SignInPage() {
             </label>
             <input
               id="email"
+              name="email"
               type="email"
               autoComplete="email"
               className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-50 outline-none ring-0 placeholder:text-neutral-600 focus:border-sky-500 focus:outline-none"
               placeholder="you@university.edu"
+              required
             />
           </div>
           <div className="space-y-1.5">
@@ -43,10 +46,12 @@ export default function SignInPage() {
             </label>
             <input
               id="password"
+              name="password"
               type="password"
               autoComplete="current-password"
               className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-50 outline-none ring-0 placeholder:text-neutral-600 focus:border-sky-500 focus:outline-none"
               placeholder="••••••••"
+              required
             />
           </div>
           <button

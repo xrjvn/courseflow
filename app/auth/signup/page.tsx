@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { signUpAction } from "../actions";
 
 export default function SignUpPage() {
   return (
@@ -18,20 +19,22 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        <form className="space-y-4">
+        <form className="space-y-4" action={signUpAction}>
           <div className="space-y-1.5">
             <label
-              htmlFor="name"
+              htmlFor="fullName"
               className="text-xs font-medium text-neutral-200"
             >
               Full name
             </label>
             <input
-              id="name"
+              id="fullName"
+              name="fullName"
               type="text"
               autoComplete="name"
               className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-50 outline-none ring-0 placeholder:text-neutral-600 focus:border-sky-500 focus:outline-none"
               placeholder="Alex Student"
+              required
             />
           </div>
           <div className="space-y-1.5">
@@ -43,10 +46,12 @@ export default function SignUpPage() {
             </label>
             <input
               id="email"
+              name="email"
               type="email"
               autoComplete="email"
               className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-50 outline-none ring-0 placeholder:text-neutral-600 focus:border-sky-500 focus:outline-none"
               placeholder="you@university.edu"
+              required
             />
           </div>
           <div className="space-y-1.5">
@@ -58,10 +63,12 @@ export default function SignUpPage() {
             </label>
             <input
               id="password"
+              name="password"
               type="password"
               autoComplete="new-password"
               className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-50 outline-none ring-0 placeholder:text-neutral-600 focus:border-sky-500 focus:outline-none"
               placeholder="••••••••"
+              required
             />
           </div>
           <button
