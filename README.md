@@ -22,9 +22,7 @@ The codebase is structured as a portfolio-quality reference for a modern full-st
 
 ## Live Demo
 
-Coming soon — will be deployed on Vercel.
-
-Production URL: (to be added)
+Production URL: https://courseflow-ten.vercel.app
 
 ---
 
