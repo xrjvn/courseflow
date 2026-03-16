@@ -1,9 +1,10 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { AssignmentStatus, AssignmentPriority } from "@/lib/types";
+import { startOfWeek, endOfWeek, formatDateShort } from "@/lib/date";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { PriorityBadge } from "@/components/ui/priority-badge";
 
-type AssignmentStatus = "not_started" | "in_progress" | "completed";
-type AssignmentPriority = "low" | "medium" | "high";
-
-type CourseInfo = {
+type CourseSummary = {
   id: string;
   name: string;
   code: string | null;
@@ -25,33 +26,8 @@ type DashboardData = {
   completedAssignments: number;
   upcomingAssignments: AssignmentSummary[];
   overdueAssignments: AssignmentSummary[];
-  coursesById: Record<string, CourseInfo>;
+  coursesById: Record<string, CourseSummary>;
 };
-
-function startOfWeek(date: Date): Date {
-  const d = new Date(date);
-  const day = d.getDay(); // 0 (Sun) - 6 (Sat)
-  const diff = (day + 6) % 7; // days since Monday
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - diff);
-  return d;
-}
-
-function endOfWeek(date: Date): Date {
-  const start = startOfWeek(date);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 7);
-  return end;
-}
-
-function formatDueDate(value: string): string {
-  const date = new Date(value);
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
 
 async function getDashboardData(): Promise<DashboardData> {
   const supabase = await createSupabaseServerClient();
@@ -141,7 +117,7 @@ async function getDashboardData(): Promise<DashboardData> {
     throw new Error(coursesError.message);
   }
 
-  const coursesById: Record<string, CourseInfo> = {};
+  const coursesById: Record<string, CourseSummary> = {};
   for (const course of coursesData ?? []) {
     coursesById[course.id as string] = {
       id: course.id as string,
@@ -250,32 +226,12 @@ export default async function DashboardPage() {
                       <p className="text-[11px] text-neutral-500">
                         {course ? course.name : "No course"}
                         {course?.code ? ` · ${course.code}` : ""} ·{" "}
-                        {formatDueDate(assignment.due_at)}
+                        {formatDateShort(assignment.due_at)}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-1">
-                      <span
-                        className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                          assignment.status === "completed"
-                            ? "bg-emerald-900/50 text-emerald-300"
-                            : assignment.status === "in_progress"
-                              ? "bg-sky-900/50 text-sky-300"
-                              : "bg-neutral-800 text-neutral-200"
-                        }`}
-                      >
-                        {assignment.status.replace("_", " ")}
-                      </span>
-                      <span
-                        className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                          assignment.priority === "high"
-                            ? "bg-red-900/60 text-red-300"
-                            : assignment.priority === "medium"
-                              ? "bg-amber-900/60 text-amber-300"
-                              : "bg-neutral-800 text-neutral-200"
-                        }`}
-                      >
-                        {assignment.priority}
-                      </span>
+                      <StatusBadge status={assignment.status} />
+                      <PriorityBadge priority={assignment.priority} />
                     </div>
                   </li>
                 );
@@ -307,7 +263,7 @@ export default async function DashboardPage() {
                       <p className="text-[11px] text-red-200/80">
                         {course ? course.name : "No course"}
                         {course?.code ? ` · ${course.code}` : ""} · Due{" "}
-                        {formatDueDate(assignment.due_at)}
+                        {formatDateShort(assignment.due_at)}
                       </p>
                     </div>
                     <span className="inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium bg-red-900/80 text-red-100">

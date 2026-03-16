@@ -4,9 +4,10 @@ import {
   updateAssignmentAction,
   deleteAssignmentAction,
 } from "./actions";
-
-type AssignmentStatus = "not_started" | "in_progress" | "completed";
-type AssignmentPriority = "low" | "medium" | "high";
+import type { AssignmentStatus, AssignmentPriority } from "@/lib/types";
+import { formatDateShort, toInputDateTimeLocal } from "@/lib/date";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { PriorityBadge } from "@/components/ui/priority-badge";
 
 type CourseOption = {
   id: string;
@@ -84,26 +85,6 @@ async function getAssignmentsAndCourses(): Promise<{
   const courses = (coursesData ?? []) as CourseOption[];
 
   return { assignments, courses };
-}
-
-function formatDueDate(value: string): string {
-  const date = new Date(value);
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function toInputDateTimeLocal(value: string): string {
-  const date = new Date(value);
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  const year = date.getFullYear();
-  const month = pad(date.getMonth() + 1);
-  const day = pad(date.getDate());
-  const hours = pad(date.getHours());
-  const minutes = pad(date.getMinutes());
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
 export default async function AssignmentsPage() {
@@ -298,7 +279,7 @@ export default async function AssignmentsPage() {
                         {course?.code ? `· ${course.code}` : ""}
                       </span>
                       <span>·</span>
-                      <span>{formatDueDate(assignment.due_at)}</span>
+                      <span>{formatDateShort(assignment.due_at)}</span>
                     </div>
                   </div>
                   <div className="hidden items-center text-xs text-neutral-300 sm:flex">
@@ -312,33 +293,13 @@ export default async function AssignmentsPage() {
                     )}
                   </div>
                   <div className="hidden items-center text-xs text-neutral-300 sm:flex">
-                    {formatDueDate(assignment.due_at)}
+                    {formatDateShort(assignment.due_at)}
                   </div>
                   <div className="mt-2 flex items-center text-[11px] sm:mt-0 sm:flex">
-                    <span
-                      className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                        assignment.status === "completed"
-                          ? "bg-emerald-900/50 text-emerald-300"
-                          : assignment.status === "in_progress"
-                            ? "bg-sky-900/50 text-sky-300"
-                            : "bg-neutral-800 text-neutral-200"
-                      }`}
-                    >
-                      {assignment.status.replace("_", " ")}
-                    </span>
+                    <StatusBadge status={assignment.status} />
                   </div>
                   <div className="mt-2 flex items-center text-[11px] sm:mt-0 sm:flex">
-                    <span
-                      className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                        assignment.priority === "high"
-                          ? "bg-red-900/60 text-red-300"
-                          : assignment.priority === "medium"
-                            ? "bg-amber-900/60 text-amber-300"
-                            : "bg-neutral-800 text-neutral-200"
-                      }`}
-                    >
-                      {assignment.priority}
-                    </span>
+                    <PriorityBadge priority={assignment.priority} />
                   </div>
                   <div className="mt-2 flex items-center justify-end gap-2 sm:mt-0">
                     <details className="group text-[11px] text-neutral-400">

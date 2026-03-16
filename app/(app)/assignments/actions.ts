@@ -2,9 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-
-type AssignmentStatus = "not_started" | "in_progress" | "completed";
-type AssignmentPriority = "low" | "medium" | "high";
+import type { AssignmentStatus, AssignmentPriority } from "@/lib/types";
 
 type AssignmentPayload = {
   title: string;

@@ -1,7 +1,8 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-
-type AssignmentStatus = "not_started" | "in_progress" | "completed";
-type AssignmentPriority = "low" | "medium" | "high";
+import type { AssignmentStatus, AssignmentPriority } from "@/lib/types";
+import { startOfWeek, endOfWeek } from "@/lib/date";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { PriorityBadge } from "@/components/ui/priority-badge";
 
 type CourseInfo = {
   id: string;
@@ -29,22 +30,6 @@ type PlannerData = {
   days: PlannerDay[];
   coursesById: Record<string, CourseInfo>;
 };
-
-function startOfWeek(date: Date): Date {
-  const d = new Date(date);
-  const day = d.getDay(); // 0 (Sun) - 6 (Sat)
-  const diff = (day + 6) % 7; // days since Monday
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - diff);
-  return d;
-}
-
-function endOfWeek(date: Date): Date {
-  const start = startOfWeek(date);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 7);
-  return end;
-}
 
 function formatDayLabel(date: Date): string {
   return date.toLocaleDateString(undefined, {
@@ -219,28 +204,8 @@ export default async function PlannerPage() {
                           {course?.code ? ` · ${course.code}` : ""}
                         </p>
                         <div className="mt-1 flex items-center gap-2 text-[10px]">
-                          <span
-                            className={`inline-flex rounded-full px-2 py-0.5 font-medium ${
-                              assignment.status === "completed"
-                                ? "bg-emerald-900/50 text-emerald-300"
-                                : assignment.status === "in_progress"
-                                  ? "bg-sky-900/50 text-sky-300"
-                                  : "bg-neutral-800 text-neutral-200"
-                            }`}
-                          >
-                            {assignment.status.replace("_", " ")}
-                          </span>
-                          <span
-                            className={`inline-flex rounded-full px-2 py-0.5 font-medium ${
-                              assignment.priority === "high"
-                                ? "bg-red-900/60 text-red-300"
-                                : assignment.priority === "medium"
-                                  ? "bg-amber-900/60 text-amber-300"
-                                  : "bg-neutral-800 text-neutral-200"
-                            }`}
-                          >
-                            {assignment.priority}
-                          </span>
+                          <StatusBadge status={assignment.status} />
+                          <PriorityBadge priority={assignment.priority} />
                         </div>
                       </li>
                     );
