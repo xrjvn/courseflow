@@ -1,4 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { SyllabusStatus } from "@/lib/types";
+import { SyllabusStatusBadge } from "@/components/ui/syllabus-status-badge";
 import {
   createCourseAction,
   updateCourseAction,
@@ -16,7 +18,16 @@ type Course = {
   updated_at: string;
 };
 
-async function getCourses(): Promise<Course[]> {
+type SyllabusRow = {
+  id: string;
+  course_id: string;
+  status: SyllabusStatus;
+};
+
+async function getCoursesAndSyllabi(): Promise<{
+  courses: Course[];
+  syllabiByCourseId: Record<string, SyllabusRow>;
+}> {
   const supabase = await createSupabaseServerClient();
 
   const {
@@ -29,24 +40,45 @@ async function getCourses(): Promise<Course[]> {
   }
 
   if (!user) {
-    return [];
+    return { courses: [], syllabiByCourseId: {} };
   }
 
-  const { data, error } = await supabase
+  const { data: coursesData, error: coursesError } = await supabase
     .from("courses")
     .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    throw new Error(error.message);
+  if (coursesError) {
+    throw new Error(coursesError.message);
   }
 
-  return (data ?? []) as Course[];
+  const { data: syllabiData, error: syllabiError } = await supabase
+    .from("syllabi")
+    .select("id, course_id, status")
+    .eq("user_id", user.id);
+
+  if (syllabiError) {
+    throw new Error(syllabiError.message);
+  }
+
+  const syllabiByCourseId: Record<string, SyllabusRow> = {};
+  for (const row of syllabiData ?? []) {
+    syllabiByCourseId[row.course_id as string] = {
+      id: row.id as string,
+      course_id: row.course_id as string,
+      status: row.status as SyllabusStatus,
+    };
+  }
+
+  return {
+    courses: (coursesData ?? []) as Course[],
+    syllabiByCourseId,
+  };
 }
 
 export default async function CoursesPage() {
-  const courses = await getCourses();
+  const { courses, syllabiByCourseId } = await getCoursesAndSyllabi();
 
   return (
     <div className="space-y-6">
@@ -152,7 +184,12 @@ export default async function CoursesPage() {
         </section>
       ) : (
         <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {courses.map((course) => (
+          {courses.map((course) => {
+            const syllabus = syllabiByCourseId[course.id];
+            const syllabusStatus: SyllabusStatus | "none" =
+              syllabus?.status ?? "none";
+
+            return (
             <article
               key={course.id}
               className="flex flex-col justify-between rounded-xl border border-neutral-800 bg-neutral-900/60 p-4"
@@ -162,11 +199,14 @@ export default async function CoursesPage() {
                   <h3 className="text-sm font-medium text-neutral-100">
                     {course.name}
                   </h3>
-                  {course.code ? (
-                    <span className="rounded-full border border-neutral-700 bg-neutral-900 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-neutral-300">
-                      {course.code}
-                    </span>
-                  ) : null}
+                  <div className="flex items-center gap-2">
+                    {course.code ? (
+                      <span className="rounded-full border border-neutral-700 bg-neutral-900 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-neutral-300">
+                        {course.code}
+                      </span>
+                    ) : null}
+                    <SyllabusStatusBadge status={syllabusStatus} />
+                  </div>
                 </div>
                 {course.semester ? (
                   <p className="text-xs text-neutral-400">{course.semester}</p>
@@ -176,8 +216,50 @@ export default async function CoursesPage() {
                   </p>
                 )}
               </div>
-              <div className="mt-4 flex items-center justify-between gap-2">
-                <details className="group w-full text-xs text-neutral-400">
+              <div className="mt-4 space-y-3">
+                <details className="group text-xs text-neutral-400">
+                  <summary className="inline-flex cursor-pointer items-center rounded-full border border-neutral-700 px-2.5 py-1 text-[11px] font-medium text-neutral-200 hover:border-neutral-500 hover:bg-neutral-900">
+                    Upload syllabus
+                  </summary>
+                  <form
+                    className="mt-3 space-y-2 rounded-lg border border-neutral-800 bg-neutral-950/90 p-3"
+                    action="/api/syllabi/upload"
+                    method="post"
+                    encType="multipart/form-data"
+                  >
+                    <input type="hidden" name="course_id" value={course.id} />
+                    <div className="space-y-1">
+                      <label
+                        htmlFor={`syllabus-${course.id}`}
+                        className="text-[11px] font-medium text-neutral-200"
+                      >
+                        Syllabus PDF
+                      </label>
+                      <input
+                        id={`syllabus-${course.id}`}
+                        name="file"
+                        type="file"
+                        accept="application/pdf,.pdf"
+                        required
+                        className="block w-full text-[11px] text-neutral-300 file:mr-3 file:rounded-full file:border file:border-neutral-700 file:bg-neutral-900 file:px-3 file:py-1.5 file:text-[11px] file:font-medium file:text-neutral-200 hover:file:border-neutral-500 hover:file:bg-neutral-800"
+                      />
+                      <p className="text-[11px] text-neutral-500">
+                        Uploading a new file will replace the existing syllabus.
+                      </p>
+                    </div>
+                    <div className="flex justify-end pt-1">
+                      <button
+                        type="submit"
+                        className="inline-flex items-center rounded-full bg-sky-500 px-3 py-1.5 text-[11px] font-semibold text-neutral-950 shadow-sm hover:bg-sky-400"
+                      >
+                        Upload PDF
+                      </button>
+                    </div>
+                  </form>
+                </details>
+
+                <div className="flex items-center justify-between gap-2">
+                  <details className="group w-full text-xs text-neutral-400">
                   <summary className="inline-flex cursor-pointer items-center rounded-full border border-neutral-700 px-2.5 py-1 text-[11px] font-medium text-neutral-200 hover:border-neutral-500 hover:bg-neutral-900">
                     Edit
                   </summary>
@@ -269,8 +351,10 @@ export default async function CoursesPage() {
                   </button>
                 </form>
               </div>
+              </div>
             </article>
-          ))}
+            );
+          })}
         </section>
       )}
     </div>

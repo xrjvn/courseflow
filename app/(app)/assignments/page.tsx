@@ -3,8 +3,13 @@ import {
   createAssignmentAction,
   updateAssignmentAction,
   deleteAssignmentAction,
+  importSyllabusSuggestionsAction,
 } from "./actions";
-import type { AssignmentStatus, AssignmentPriority } from "@/lib/types";
+import type {
+  AssignmentStatus,
+  AssignmentPriority,
+  SyllabusSuggestion,
+} from "@/lib/types";
 import { formatDateShort, toInputDateTimeLocal } from "@/lib/date";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PriorityBadge } from "@/components/ui/priority-badge";
@@ -29,9 +34,17 @@ type AssignmentRow = {
   updated_at: string;
 };
 
+type SyllabusRow = {
+  id: string;
+  course_id: string;
+  status: "parsed";
+  parsed_suggestions: SyllabusSuggestion[] | null;
+};
+
 async function getAssignmentsAndCourses(): Promise<{
   assignments: AssignmentRow[];
   courses: CourseOption[];
+  syllabi: SyllabusRow[];
 }> {
   const supabase = await createSupabaseServerClient();
 
@@ -45,50 +58,68 @@ async function getAssignmentsAndCourses(): Promise<{
   }
 
   if (!user) {
-    return { assignments: [], courses: [] };
+    return { assignments: [], courses: [], syllabi: [] };
   }
 
-  const { data: assignmentsData, error: assignmentsError } = await supabase
-    .from("assignments")
-    .select(
-      `
-        id,
-        user_id,
-        course_id,
-        title,
-        description,
-        due_at,
-        status,
-        priority,
-        created_at,
-        updated_at
-      `,
-    )
-    .eq("user_id", user.id)
-    .order("due_at", { ascending: true });
+  const [
+    { data: assignmentsData, error: assignmentsError },
+    { data: coursesData, error: coursesError },
+    { data: syllabiData, error: syllabiError },
+  ] = await Promise.all([
+    supabase
+      .from("assignments")
+      .select(
+        `
+          id,
+          user_id,
+          course_id,
+          title,
+          description,
+          due_at,
+          status,
+          priority,
+          created_at,
+          updated_at
+        `,
+      )
+      .eq("user_id", user.id)
+      .order("due_at", { ascending: true }),
+    supabase
+      .from("courses")
+      .select("id, name, code, color")
+      .eq("user_id", user.id)
+      .order("name", { ascending: true }),
+    supabase
+      .from("syllabi")
+      .select("id, course_id, status, parsed_suggestions")
+      .eq("user_id", user.id)
+      .eq("status", "parsed")
+      .not("parsed_suggestions", "is", null),
+  ]);
 
-  if (assignmentsError) {
-    throw new Error(assignmentsError.message);
-  }
-
-  const { data: coursesData, error: coursesError } = await supabase
-    .from("courses")
-    .select("id, name, code, color")
-    .eq("user_id", user.id)
-    .order("name", { ascending: true });
-
-  if (coursesError) {
-    throw new Error(coursesError.message);
-  }
+  if (assignmentsError) throw new Error(assignmentsError.message);
+  if (coursesError) throw new Error(coursesError.message);
+  if (syllabiError) throw new Error(syllabiError.message);
 
   const assignments = (assignmentsData ?? []) as AssignmentRow[];
   const courses = (coursesData ?? []) as CourseOption[];
+  const syllabi = (syllabiData ?? []) as SyllabusRow[];
 
-  return { assignments, courses };
+  return { assignments, courses, syllabi };
 }
 
 export default async function AssignmentsPage() {
-  const { assignments, courses } = await getAssignmentsAndCourses();
+  const { assignments, courses, syllabi } = await getAssignmentsAndCourses();
+
+  const coursesById = new Map(courses.map((c) => [c.id, c] as const));
+  const syllabusGroups = syllabi
+    .map((s) => ({
+      syllabusId: s.id,
+      courseId: s.course_id,
+      course: coursesById.get(s.course_id),
+      suggestions: Array.isArray(s.parsed_suggestions) ? s.parsed_suggestions : [],
+    }))
+    .filter((g) => g.suggestions.length > 0 && g.course);
 
   return (
     <div className="space-y-6">
@@ -453,6 +484,103 @@ export default async function AssignmentsPage() {
           </div>
         </section>
       )}
+
+      <section className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-medium text-neutral-100">From syllabus</h2>
+          <span className="text-xs text-neutral-500">
+            {syllabusGroups.length === 0
+              ? "No parsed syllabi yet"
+              : `${syllabusGroups.length} course${syllabusGroups.length === 1 ? "" : "s"}`}
+          </span>
+        </div>
+
+        {syllabusGroups.length === 0 ? (
+          <div className="mt-4 rounded-lg border border-dashed border-neutral-800 bg-neutral-900/40 p-6 text-sm text-neutral-400">
+            Upload a syllabus on the Courses page to generate suggestions you can review and import here.
+          </div>
+        ) : (
+          <div className="mt-4 space-y-4">
+            {syllabusGroups.map((group) => (
+              <div
+                key={group.syllabusId}
+                className="rounded-lg border border-neutral-800 bg-neutral-950/40 p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-neutral-100">
+                      {group.course!.name}
+                      {group.course!.code ? ` · ${group.course!.code}` : ""}
+                    </p>
+                    <p className="mt-1 text-[11px] text-neutral-500">
+                      Select items to create real assignments.
+                    </p>
+                  </div>
+                </div>
+
+                <form action={importSyllabusSuggestionsAction} className="mt-3 space-y-3">
+                  <input type="hidden" name="syllabus_id" value={group.syllabusId} />
+                  <div className="space-y-2">
+                    {group.suggestions.map((s) => {
+                      const dueLabel =
+                        s.suggestedDueAt
+                          ? formatDateShort(s.suggestedDueAt)
+                          : s.rawDateText
+                            ? s.rawDateText
+                            : "No due date";
+
+                      const canImport = Boolean(s.suggestedDueAt || s.rawDateText);
+
+                      return (
+                        <label
+                          key={s.id}
+                          className={`flex items-start gap-3 rounded-lg border border-neutral-800 bg-neutral-950/60 px-3 py-2 ${
+                            canImport ? "cursor-pointer" : "opacity-60"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            name="suggestion_id"
+                            value={s.id}
+                            disabled={!canImport}
+                            className="mt-1 h-4 w-4 rounded border-neutral-700 bg-neutral-950 text-sky-500"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="text-sm font-medium text-neutral-100">
+                                {s.title}
+                              </p>
+                              <span className="rounded-full bg-neutral-800 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-neutral-200">
+                                {s.type}
+                              </span>
+                              <span className="text-[11px] text-neutral-400">
+                                {dueLabel}
+                              </span>
+                            </div>
+                            {s.notes ? (
+                              <p className="mt-1 text-[11px] text-neutral-500">
+                                {s.notes}
+                              </p>
+                            ) : null}
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      className="inline-flex items-center rounded-full bg-sky-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 shadow-sm hover:bg-sky-400"
+                    >
+                      Import selected
+                    </button>
+                  </div>
+                </form>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
