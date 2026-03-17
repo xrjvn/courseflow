@@ -22,7 +22,7 @@ export default function AppShell({ children }: AppShellProps) {
   const title = getPageTitle(pathname);
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-50">
+    <div className="min-h-screen bg-bg-base text-text-primary">
       <div className="flex min-h-screen">
         <Sidebar />
         <div className="flex flex-1 flex-col">
