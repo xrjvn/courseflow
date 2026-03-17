@@ -1,30 +1,62 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050509;
-  --foreground: #f4f4f5;
+  /* Background layers */
+  --bg-base: #080810;
+  --bg-surface: #0e0e18;
+  --bg-elevated: #13131f;
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.09);
+
+  /* Text */
+  --text-primary: rgba(255, 255, 255, 0.9);
+  --text-secondary: rgba(255, 255, 255, 0.45);
+  --text-muted: rgba(255, 255, 255, 0.25);
+
+  /* Accent (purple-violet) */
+  --accent: #7c6aff;
+  --accent-secondary: #a855f7;
+  --accent-gradient: linear-gradient(135deg, #7c6aff, #a855f7);
+
+  /* Status colors */
+  --color-high: #f87171;
+  --color-med: #fbbf24;
+  --color-low: #34d399;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont,
-    "SF Pro Text", "SF Pro Display", sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo,
-    Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+@theme {
+  /* Colors → usable as Tailwind v4 utilities (e.g. bg-bg-surface, text-text-primary) */
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border-default: var(--border-default);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-accent: var(--accent);
+  --color-accent-secondary: var(--accent-secondary);
+
+  --color-status-high: var(--color-high);
+  --color-status-med: var(--color-med);
+  --color-status-low: var(--color-low);
+
+  /* Gradient token (usable via arbitrary values or as var()) */
+  --accent-gradient: linear-gradient(135deg, #7c6aff, #a855f7);
+
+  /* Typography (uses next/font/google variables already set in app/layout.tsx) */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #050509;
-    --foreground: #f4f4f5;
-  }
-}
-
+html,
 body {
-  background: radial-gradient(circle at top, #020617 0, #020617 30%, #020617 60%)
-      fixed,
-    radial-gradient(circle at bottom, #020617 0, #020617 30%, #020617 60%) fixed;
-  color: var(--foreground);
+  background: var(--bg-base);
+  color: var(--text-primary);
   font-family: var(--font-geist-sans);
 }
