@@ -179,82 +179,87 @@ export default async function DashboardPage() {
     coursesById,
   } = await getDashboardData();
 
+  const statCardClass =
+    "relative overflow-hidden rounded-[10px] border border-border-subtle bg-bg-surface p-4";
+
+  const statCardHighlightClass =
+    "before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px " +
+    "before:bg-[linear-gradient(90deg,transparent,rgba(124,106,255,0.3),transparent)]";
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-4">
-          <p className="text-xs font-medium text-neutral-400">Courses</p>
-          <p className="mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
+        <div className={`${statCardClass} ${statCardHighlightClass}`}>
+          <p className="text-[11px] font-medium text-text-muted">Courses</p>
+          <p className="mt-2 text-3xl font-medium tracking-tight text-text-primary">
             {totalCourses}
           </p>
-          <p className="mt-1 text-xs text-neutral-500">
+          <p className="mt-1 text-[11px] text-text-muted">
             Add your courses to get started.
           </p>
         </div>
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-4">
-          <p className="text-xs font-medium text-neutral-400">Assignments</p>
-          <p className="mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
+        <div className={`${statCardClass} ${statCardHighlightClass}`}>
+          <p className="text-[11px] font-medium text-text-muted">Assignments</p>
+          <p className="mt-2 text-3xl font-medium tracking-tight text-text-primary">
             {totalAssignments}
           </p>
-          <p className="mt-1 text-xs text-neutral-500">
+          <p className="mt-1 text-[11px] text-text-muted">
             All assignments across your courses.
           </p>
         </div>
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-4">
-          <p className="text-xs font-medium text-neutral-400">
-            Due this week
-          </p>
-          <p className="mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
+        <div className={`${statCardClass} ${statCardHighlightClass}`}>
+          <p className="text-[11px] font-medium text-text-muted">Due this week</p>
+          <p className="mt-2 text-3xl font-medium tracking-tight text-text-primary">
             {assignmentsDueThisWeek}
           </p>
-          <p className="mt-1 text-xs text-neutral-500">
+          <p className="mt-1 text-[11px] text-text-muted">
             Assignments with due dates in the current week.
           </p>
         </div>
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-4">
-          <p className="text-xs font-medium text-neutral-400">
+        <div className={`${statCardClass} ${statCardHighlightClass}`}>
+          <p className="text-[11px] font-medium text-text-muted">
             Completed assignments
           </p>
-          <p className="mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
+          <p className="mt-2 text-3xl font-medium tracking-tight text-text-primary">
             {completedAssignments}
           </p>
-          <p className="mt-1 text-xs text-neutral-500">
+          <p className="mt-1 text-[11px] text-text-muted">
             Finished work across the semester.
           </p>
         </div>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-4 lg:col-span-2">
+        <div className="rounded-[10px] border border-border-subtle bg-bg-surface p-4 lg:col-span-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium text-neutral-100">
+            <h2 className="text-sm font-medium text-text-primary">
               Upcoming assignments
             </h2>
-            <span className="text-xs text-neutral-500">
+            <span className="text-xs text-text-muted">
               {upcomingAssignments.length === 0
                 ? "Nothing due soon"
                 : `Next ${upcomingAssignments.length} due`}
             </span>
           </div>
           {upcomingAssignments.length === 0 ? (
-            <div className="mt-4 rounded-lg border border-dashed border-neutral-800 bg-neutral-900/40 p-6 text-sm text-neutral-400">
+            <div className="mt-4 rounded-[10px] border border-dashed border-border-subtle bg-bg-elevated p-6 text-sm text-text-secondary">
               As you add assignments with future due dates, the next few items
               will appear here.
             </div>
           ) : (
-            <ul className="mt-4 space-y-2 text-xs">
+            <ul className="mt-4 overflow-hidden rounded-[10px] border border-border-subtle bg-bg-elevated">
               {upcomingAssignments.map((assignment) => {
                 const course = coursesById[assignment.course_id];
                 return (
                   <li
                     key={assignment.id}
-                    className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-950/60 px-3 py-2"
+                    className="flex items-center justify-between px-3 py-2 border-b border-[rgba(255,255,255,0.04)] last:border-b-0"
                   >
                     <div className="space-y-0.5">
-                      <p className="text-sm font-medium text-neutral-100">
+                      <p className="text-[13px] font-medium text-text-primary">
                         {assignment.title}
                       </p>
-                      <p className="text-[11px] text-neutral-500">
+                      <p className="text-[11px] font-mono text-text-muted">
                         {course ? course.name : "No course"}
                         {course?.code ? ` · ${course.code}` : ""} ·{" "}
                         {formatDateShort(assignment.due_at)}
@@ -270,34 +275,34 @@ export default async function DashboardPage() {
             </ul>
           )}
         </div>
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-4">
-          <h2 className="text-sm font-medium text-neutral-100">
+        <div className="rounded-[10px] border border-border-subtle bg-bg-surface p-4">
+          <h2 className="text-sm font-medium text-text-primary">
             Overdue assignments
           </h2>
           {overdueAssignments.length === 0 ? (
-            <p className="mt-3 text-sm text-neutral-400">
+            <p className="mt-3 text-sm text-text-secondary">
               You&apos;re caught up. Anything overdue will show up here.
             </p>
           ) : (
-            <ul className="mt-3 space-y-2 text-xs">
+            <ul className="mt-3 overflow-hidden rounded-[10px] border border-border-subtle bg-bg-elevated">
               {overdueAssignments.map((assignment) => {
                 const course = coursesById[assignment.course_id];
                 return (
                   <li
                     key={assignment.id}
-                    className="flex items-center justify-between rounded-lg border border-red-900/60 bg-red-950/40 px-3 py-2"
+                    className="flex items-center justify-between px-3 py-2 border-b border-[rgba(255,255,255,0.04)] last:border-b-0"
                   >
                     <div className="space-y-0.5">
-                      <p className="text-sm font-medium text-red-100">
+                      <p className="text-[13px] font-medium text-text-primary">
                         {assignment.title}
                       </p>
-                      <p className="text-[11px] text-red-200/80">
+                      <p className="text-[11px] font-mono text-text-muted">
                         {course ? course.name : "No course"}
                         {course?.code ? ` · ${course.code}` : ""} · Due{" "}
                         {formatDateShort(assignment.due_at)}
                       </p>
                     </div>
-                    <span className="inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium bg-red-900/80 text-red-100">
+                    <span className="inline-flex rounded-full border border-[rgba(239,68,68,0.15)] bg-[rgba(239,68,68,0.12)] px-2 py-0.5 text-[11px] font-medium text-[#f87171]">
                       Overdue
                     </span>
                   </li>

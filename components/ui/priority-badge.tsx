@@ -14,7 +14,7 @@ export function PriorityBadge({ priority, className }: PriorityBadgeProps) {
     priority === "high"
       ? "bg-red-900/60 text-red-300"
       : priority === "medium"
-        ? "bg-amber-900/60 text-amber-300"
+        ? "border border-[rgba(245,158,11,0.15)] bg-[rgba(245,158,11,0.12)] text-[#fbbf24]"
         : "bg-neutral-800 text-neutral-200";
 
   return <span className={`${base} ${variant}`}>{priority}</span>;

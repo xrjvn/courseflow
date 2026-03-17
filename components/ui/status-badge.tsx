@@ -15,7 +15,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
       ? "bg-emerald-900/50 text-emerald-300"
       : status === "in_progress"
         ? "bg-sky-900/50 text-sky-300"
-        : "bg-neutral-800 text-neutral-200";
+        : "bg-[rgba(255,255,255,0.06)] text-text-secondary";
 
   return (
     <span className={`${base} ${variant}`}>
