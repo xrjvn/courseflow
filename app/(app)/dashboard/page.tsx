@@ -23,6 +23,7 @@ type DashboardData = {
   totalCourses: number;
   totalAssignments: number;
   assignmentsDueThisWeek: number;
+  plannerCoveragePercent: number;
   completedAssignments: number;
   upcomingAssignments: AssignmentSummary[];
   overdueAssignments: AssignmentSummary[];
@@ -46,6 +47,7 @@ async function getDashboardData(): Promise<DashboardData> {
       totalCourses: 0,
       totalAssignments: 0,
       assignmentsDueThisWeek: 0,
+      plannerCoveragePercent: 0,
       completedAssignments: 0,
       upcomingAssignments: [],
       overdueAssignments: [],
@@ -81,7 +83,34 @@ async function getDashboardData(): Promise<DashboardData> {
     .select("id", { count: "exact", head: true })
     .eq("user_id", userId)
     .gte("due_at", weekStart)
-    .lt("due_at", weekEnd);
+    .lt("due_at", weekEnd)
+    .neq("status", "completed");
+
+  const { data: dueThisWeekDates, error: dueThisWeekDatesError } = await supabase
+    .from("assignments")
+    .select("due_at")
+    .eq("user_id", userId)
+    .gte("due_at", weekStart)
+    .lt("due_at", weekEnd)
+    .neq("status", "completed");
+
+  if (dueThisWeekDatesError) {
+    throw new Error(dueThisWeekDatesError.message);
+  }
+
+  const daysWithAssignments = new Set<string>();
+  for (const row of dueThisWeekDates ?? []) {
+    const dueAt = row.due_at as string;
+    const d = new Date(dueAt);
+    const key = `${d.getFullYear()}-${(d.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")}`;
+    daysWithAssignments.add(key);
+  }
+
+  const plannerCoveragePercent = Math.round(
+    (daysWithAssignments.size / 7) * 100,
+  );
 
   const { data: upcomingData, error: upcomingError } = await supabase
     .from("assignments")
@@ -130,6 +159,7 @@ async function getDashboardData(): Promise<DashboardData> {
     totalCourses: coursesCount ?? 0,
     totalAssignments: assignmentsCount ?? 0,
     assignmentsDueThisWeek: dueThisWeekCount ?? 0,
+    plannerCoveragePercent,
     completedAssignments: completedCount ?? 0,
     upcomingAssignments: (upcomingData ?? []) as AssignmentSummary[],
     overdueAssignments: (overdueData ?? []) as AssignmentSummary[],
@@ -142,6 +172,7 @@ export default async function DashboardPage() {
     totalCourses,
     totalAssignments,
     assignmentsDueThisWeek,
+    plannerCoveragePercent,
     completedAssignments,
     upcomingAssignments,
     overdueAssignments,
