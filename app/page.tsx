@@ -1,3 +1,6 @@
+import { FileText, BarChart2, CalendarDays, GraduationCap } from "lucide-react";
+import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
+
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-[var(--bg-base)] text-[var(--text-primary)]">
@@ -33,8 +36,11 @@ export default function Home() {
       <main className="flex-1 bg-[var(--bg-base)]">
         {/* HERO */}
         <section className="relative flex min-h-[calc(100vh-4rem)] items-center">
-          <div className="pointer-events-none absolute inset-x-0 top-24 flex justify-center">
-            <div className="h-72 w-72 rounded-full bg-[radial-gradient(circle_at_center,rgba(124,106,255,0.18),transparent_60%)] blur-3xl" />
+          <div className="pointer-events-none absolute inset-x-0 top-12 flex justify-center">
+            <div className="h-80 w-80 rounded-full bg-[radial-gradient(circle_at_top,rgba(124,106,255,0.16),transparent_60%)] blur-3xl" />
+          </div>
+          <div className="pointer-events-none absolute inset-x-24 top-40 hidden justify-center sm:flex">
+            <div className="h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(124,106,255,0.12),transparent_60%)] blur-3xl" />
           </div>
           <div className="relative mx-auto flex max-w-6xl flex-col items-start justify-center gap-8 px-4 py-12 sm:px-6 lg:px-8">
             <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(124,106,255,0.35)] bg-[rgba(124,106,255,0.08)] px-3 py-1 text-[11px] font-medium text-[var(--text-secondary)] shadow-[0_0_24px_rgba(124,106,255,0.35)]">
@@ -42,7 +48,7 @@ export default function Home() {
               Built for university students
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 max-w-2xl">
               <h1 className="text-4xl font-semibold leading-tight tracking-[-0.04em] text-[var(--text-primary)] sm:text-5xl md:text-6xl lg:text-[64px]">
                 Your syllabus.
                 <br />
@@ -87,6 +93,61 @@ export default function Home() {
                 <span>Every due date, automatically prioritized</span>
               </div>
             </div>
+            {/* 3D mockup */}
+            <div className="mt-10 hidden w-full max-w-xl transform-gpu perspective-[2000px] md:block">
+              <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 shadow-[0_40px_120px_rgba(0,0,0,0.9)] [transform:rotateX(18deg)_rotateY(-18deg)]">
+                <div className="mb-3 flex items-center justify-between text-[10px] text-[var(--text-secondary)]">
+                  <span className="h-2 w-16 rounded-full bg-[rgba(255,255,255,0.06)]" />
+                  <span className="h-2 w-8 rounded-full bg-[rgba(255,255,255,0.04)]" />
+                </div>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  <div className="rounded-lg border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.02)] p-2">
+                    <p className="text-[10px] text-[var(--text-muted)]">
+                      Assignments this week
+                    </p>
+                    <p className="mt-2 text-xl font-medium text-[var(--text-primary)]">
+                      7
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.02)] p-2">
+                    <p className="text-[10px] text-[var(--text-muted)]">
+                      Courses
+                    </p>
+                    <p className="mt-2 text-xl font-medium text-[var(--text-primary)]">
+                      5
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.02)] p-2">
+                    <p className="text-[10px] text-[var(--text-muted)]">
+                      Planner coverage
+                    </p>
+                    <p className="mt-2 text-xl font-medium text-[var(--text-primary)]">
+                      86%
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 rounded-lg border border-dashed border-[var(--border-subtle)] bg-[rgba(255,255,255,0.01)] p-3">
+                  <div className="mb-2 flex items-center justify-between text-[10px] text-[var(--text-secondary)]">
+                    <span>Upcoming this week</span>
+                    <span>View planner</span>
+                  </div>
+                  <div className="space-y-1.5 text-[10px] text-[var(--text-muted)]">
+                    <div className="flex items-center justify-between">
+                      <span>CS 201 · Problem Set 3</span>
+                      <span>Tue</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Bio 110 · Lab report</span>
+                      <span>Thu</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>History 240 · Midterm</span>
+                      <span>Fri</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -126,49 +187,49 @@ export default function Home() {
             <div className="mb-8 text-center text-[11px] font-medium uppercase tracking-[0.2em] text-[var(--text-muted)]">
               Why Courseflow
             </div>
-            <div className="grid gap-4 md:grid-cols-3">
-              {/* Card 1 */}
-              <div className="relative overflow-hidden rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:bg-[linear-gradient(90deg,#7c6aff,#a855f7)] before:content-['']">
-                <div className="mb-4 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(124,106,255,0.15)] text-[var(--accent)]">
-                  <span className="text-xs">⬆</span>
-                </div>
-                <h3 className="text-sm font-medium text-[var(--text-primary)]">
-                  Upload your syllabus
-                </h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-secondary)]">
-                  Drop in a PDF. AI reads every due date, exam, and assignment in
-                  seconds. No manual entry ever.
-                </p>
-              </div>
-
-              {/* Card 2 */}
-              <div className="relative overflow-hidden rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:bg-[linear-gradient(90deg,#7c6aff,#a855f7)] before:content-['']">
-                <div className="mb-4 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(124,106,255,0.15)] text-[var(--accent)]">
-                  <span className="text-xs">⚡</span>
-                </div>
-                <h3 className="text-sm font-medium text-[var(--text-primary)]">
-                  Smart priority scoring
-                </h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-secondary)]">
-                  Every assignment is weighted by how much it&apos;s worth. Know
-                  what actually matters before it&apos;s too late.
-                </p>
-              </div>
-
-              {/* Card 3 */}
-              <div className="relative overflow-hidden rounded-[12px] border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6 before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:bg-[linear-gradient(90deg,#7c6aff,#a855f7)] before:content-['']">
-                <div className="mb-4 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(124,106,255,0.15)] text-[var(--accent)]">
-                  <span className="text-xs">▦</span>
-                </div>
-                <h3 className="text-sm font-medium text-[var(--text-primary)]">
-                  One view for everything
-                </h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-secondary)]">
-                  All your courses, all your deadlines, one clean dashboard.
-                  Weekly planner included.
-                </p>
-              </div>
-            </div>
+            <BentoGrid className="auto-rows-[18rem] md:auto-rows-[22rem]">
+              <BentoCard
+                name="Upload your syllabus"
+                description="Drop in any PDF. AI reads every due date, exam, and assignment in seconds. Your entire semester organized before your first class."
+                Icon={FileText}
+                href="/auth/signup"
+                cta="Start with a syllabus"
+                className="md:col-span-2 md:row-span-2"
+                background={
+                  <div className="absolute inset-0 overflow-hidden">
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(124,106,255,0.3),transparent_60%)]" />
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.24),transparent_60%)] mix-blend-screen" />
+                  </div>
+                }
+              />
+              <BentoCard
+                name="Smart priority scoring"
+                description="Every assignment weighted by how much it's worth. Know what actually matters before it's too late."
+                Icon={BarChart2}
+                href="/auth/signup"
+                cta="See how it ranks work"
+                className="md:col-span-1"
+                background={<div />}
+              />
+              <BentoCard
+                name="Weekly planner"
+                description="All your courses, all your deadlines, one clean dashboard. See your entire week at a glance."
+                Icon={CalendarDays}
+                href="/auth/signup"
+                cta="View the planner"
+                className="md:col-span-1"
+                background={<div />}
+              />
+              <BentoCard
+                name="Works with any university"
+                description="If your professor can email it, CourseFlow can read it. Any format, any school, any course."
+                Icon={GraduationCap}
+                href="/auth/signup"
+                cta="Check compatibility"
+                className="md:col-span-3 md:row-span-1"
+                background={<div />}
+              />
+            </BentoGrid>
           </div>
         </section>
       </main>
