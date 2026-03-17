@@ -165,58 +165,20 @@ function coerceDueAt(suggestion: SyllabusSuggestion): string | null {
   return null;
 }
 
-export async function importSyllabusSuggestionsAction(formData: FormData) {
-  const syllabusId = getRequiredField(formData, "syllabus_id");
-  const selectedIds = formData.getAll("suggestion_id").filter((v) => typeof v === "string") as string[];
+export async function importSyllabusSuggestionsForCourse(args: {
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>;
+  userId: string;
+  courseId: string;
+  suggestions: SyllabusSuggestion[];
+  selectedIds?: string[];
+}): Promise<{ importedCount: number }> {
+  const { supabase, userId, courseId, suggestions, selectedIds } = args;
 
-  if (selectedIds.length === 0) {
-    revalidatePath("/assignments");
-    return;
-  }
+  const suggestionsToImport = selectedIds
+    ? suggestions.filter((s) => selectedIds.includes(s.id))
+    : suggestions;
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError) {
-    throw new Error(userError.message);
-  }
-  if (!user) {
-    throw new Error("Not authenticated");
-  }
-
-  const { data: syllabusRow, error: syllabusError } = await supabase
-    .from("syllabi")
-    .select("id, course_id, parsed_suggestions, status")
-    .eq("id", syllabusId)
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (syllabusError) {
-    throw new Error(syllabusError.message);
-  }
-  if (!syllabusRow) {
-    throw new Error("Syllabus not found");
-  }
-  if (syllabusRow.status !== "parsed") {
-    throw new Error("Syllabus is not parsed");
-  }
-
-  const parsed = syllabusRow.parsed_suggestions as unknown;
-  if (!Array.isArray(parsed)) {
-    throw new Error("Syllabus suggestions are missing");
-  }
-
-  const allSuggestions = parsed as SyllabusSuggestion[];
-  const suggestionsToImport = allSuggestions.filter((s) =>
-    selectedIds.includes(s.id),
-  );
-
-  const courseId = syllabusRow.course_id as string;
-  const userId = user.id;
-
+  let importedCount = 0;
   const inserts: Array<AssignmentPayload & { user_id: string }> = [];
 
   for (const suggestion of suggestionsToImport) {
@@ -265,7 +227,66 @@ export async function importSyllabusSuggestionsAction(formData: FormData) {
     if (insertError) {
       throw new Error(insertError.message);
     }
+    importedCount = inserts.length;
   }
+
+  return { importedCount };
+}
+
+export async function importSyllabusSuggestionsAction(formData: FormData) {
+  const syllabusId = getRequiredField(formData, "syllabus_id");
+  const selectedIds = formData.getAll("suggestion_id").filter((v) => typeof v === "string") as string[];
+
+  if (selectedIds.length === 0) {
+    revalidatePath("/assignments");
+    return;
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError) {
+    throw new Error(userError.message);
+  }
+  if (!user) {
+    throw new Error("Not authenticated");
+  }
+
+  const { data: syllabusRow, error: syllabusError } = await supabase
+    .from("syllabi")
+    .select("id, course_id, parsed_suggestions, status")
+    .eq("id", syllabusId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (syllabusError) {
+    throw new Error(syllabusError.message);
+  }
+  if (!syllabusRow) {
+    throw new Error("Syllabus not found");
+  }
+  if (syllabusRow.status !== "parsed") {
+    throw new Error("Syllabus is not parsed");
+  }
+
+  const parsed = syllabusRow.parsed_suggestions as unknown;
+  if (!Array.isArray(parsed)) {
+    throw new Error("Syllabus suggestions are missing");
+  }
+
+  const allSuggestions = parsed as SyllabusSuggestion[];
+  const courseId = syllabusRow.course_id as string;
+  const userId = user.id;
+  await importSyllabusSuggestionsForCourse({
+    supabase,
+    userId,
+    courseId,
+    suggestions: allSuggestions,
+    selectedIds,
+  });
 
   revalidatePath("/assignments");
 }

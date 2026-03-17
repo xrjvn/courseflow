@@ -77,11 +77,48 @@ async function getCoursesAndSyllabi(): Promise<{
   };
 }
 
-export default async function CoursesPage() {
+export default async function CoursesPage({
+  searchParams,
+}: {
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
   const { courses, syllabiByCourseId } = await getCoursesAndSyllabi();
+
+  const syllabusImported =
+    typeof searchParams?.syllabusImported === "string"
+      ? searchParams.syllabusImported === "1"
+      : false;
+
+  const importedCountRaw =
+    typeof searchParams?.importedCount === "string"
+      ? searchParams.importedCount
+      : "";
+  const importedCount = Number.parseInt(importedCountRaw, 10);
+
+  const importedCourseId =
+    typeof searchParams?.courseId === "string" ? searchParams.courseId : "";
+
+  const importedCourseName =
+    importedCourseId && courses.length
+      ? courses.find((c) => c.id === importedCourseId)?.name
+      : undefined;
 
   return (
     <div className="space-y-6">
+      {syllabusImported && Number.isFinite(importedCount) ? (
+        <details
+          className="rounded-xl border border-emerald-900/60 bg-emerald-950/30 px-4 py-3"
+          open
+        >
+          <summary className="cursor-pointer select-none text-xs font-medium text-emerald-200">
+            Dismiss
+          </summary>
+          <p className="mt-2 text-sm text-emerald-100">
+            {importedCount} assignment{importedCount === 1 ? "" : "s"} imported
+            from {importedCourseName ?? "course"}.
+          </p>
+        </details>
+      ) : null}
       <header className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-sm font-medium text-neutral-100">Courses</h2>

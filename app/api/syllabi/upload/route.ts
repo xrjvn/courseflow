@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { extractTextFromPdf, generateSyllabusSuggestions } from "@/lib/ai/syllabus";
+import { importSyllabusSuggestionsForCourse } from "@/app/(app)/assignments/actions";
 
 export const runtime = "nodejs";
 
@@ -148,6 +149,20 @@ export async function POST(request: Request) {
         throw new Error(insertError.message);
       }
     }
+
+    // Auto-import all suggestions immediately after parsing.
+    const { importedCount } = await importSyllabusSuggestionsForCourse({
+      supabase,
+      userId,
+      courseId,
+      suggestions,
+    });
+
+    const redirectUrl = new URL("/courses", request.url);
+    redirectUrl.searchParams.set("syllabusImported", "1");
+    redirectUrl.searchParams.set("importedCount", String(importedCount));
+    redirectUrl.searchParams.set("courseId", courseId);
+    return NextResponse.redirect(redirectUrl, 303);
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Unknown parsing error";
