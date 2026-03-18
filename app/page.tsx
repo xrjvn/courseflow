@@ -1,242 +1,367 @@
-import { FileText, BarChart2, CalendarDays, GraduationCap } from "lucide-react";
-import { BentoGrid, BentoCard } from "@/components/ui/bento-grid";
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { FileText, Zap, CalendarDays } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AnimatedGroup } from "@/components/ui/animated-group";
 
 export default function Home() {
+  const [scrolled, setScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <div className="flex min-h-screen flex-col bg-[var(--bg-base)] text-[var(--text-primary)]">
       {/* NAVBAR */}
-      <header className="sticky top-0 z-20 border-b border-[var(--border-subtle)] bg-[var(--bg-base)]/80 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#7c6aff,#a855f7)] text-sm font-semibold text-white">
+      <header
+        className={`sticky top-0 z-30 border-b border-[var(--border-subtle)] transition-colors ${
+          scrolled ? "bg-[var(--bg-base)]/90 backdrop-blur" : "bg-[var(--bg-base)]"
+        }`}
+      >
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
+          <Link href="/" className="flex items-center gap-2">
+            <div
+              style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-semibold text-white"
+            >
               CF
             </div>
             <span className="text-sm font-medium text-[var(--text-primary)]">
               Courseflow
             </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <a
-              href="/auth/signin"
-              className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          </Link>
+
+          <div className="hidden items-center gap-3 sm:flex">
+            <Button variant="outline" asChild size="sm">
+              <Link href="/auth/signin">Sign in</Link>
+            </Button>
+            <Button
+              asChild
+              size="sm"
+              className="border-0 text-xs font-medium text-white"
+              style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}
             >
-              Sign in
-            </a>
-            <a
-              href="/auth/signup"
-              className="inline-flex items-center rounded-full bg-[linear-gradient(135deg,#7c6aff,#a855f7)] px-4 py-1.5 text-xs font-semibold text-white shadow-sm"
-            >
-              Get started free
-            </a>
+              <Link href="/auth/signup">Get started free</Link>
+            </Button>
           </div>
+
+          <button
+            className="inline-flex items-center justify-center rounded-md p-2 text-[var(--text-secondary)] hover:bg-white/5 sm:hidden"
+            aria-label="Toggle navigation"
+            onClick={() => setIsMenuOpen((prev) => !prev)}
+          >
+            <span className="sr-only">Open menu</span>
+            <svg
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            >
+              {isMenuOpen ? (
+                <path d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <>
+                  <path d="M4 7h16" />
+                  <path d="M4 12h16" />
+                  <path d="M4 17h16" />
+                </>
+              )}
+            </svg>
+          </button>
         </div>
+
+        {isMenuOpen && (
+          <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-base)] px-4 pb-4 pt-2 sm:hidden">
+            <div className="flex flex-col gap-2">
+              <Button variant="outline" asChild size="sm" className="justify-center">
+                <Link href="/auth/signin">Sign in</Link>
+              </Button>
+              <Button
+                asChild
+                size="sm"
+                className="justify-center border-0 text-xs font-medium text-white"
+                style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}
+              >
+                <Link href="/auth/signup">Get started free</Link>
+              </Button>
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* MAIN */}
       <main className="flex-1 bg-[var(--bg-base)]">
-        {/* HERO */}
-        <section className="relative flex min-h-[calc(100vh-4rem)] items-center">
-          <div className="pointer-events-none absolute inset-x-0 top-12 flex justify-center">
-            <div className="h-80 w-80 rounded-full bg-[radial-gradient(circle_at_top,rgba(124,106,255,0.16),transparent_60%)] blur-3xl" />
+        {/* HERO SECTION 2 */}
+        <section className="relative overflow-hidden">
+          <div className="pointer-events-none absolute inset-0 flex justify-center">
+            <div className="h-[520px] w-[520px] translate-y-[-10%] rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.08)_0%,transparent_70%)] blur-3xl" />
           </div>
-          <div className="pointer-events-none absolute inset-x-24 top-40 hidden justify-center sm:flex">
-            <div className="h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(124,106,255,0.12),transparent_60%)] blur-3xl" />
-          </div>
-          <div className="relative mx-auto flex max-w-6xl flex-col items-start justify-center gap-8 px-4 py-12 sm:px-6 lg:px-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(124,106,255,0.35)] bg-[rgba(124,106,255,0.08)] px-3 py-1 text-[11px] font-medium text-[var(--text-secondary)] shadow-[0_0_24px_rgba(124,106,255,0.35)]">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-              Built for university students
-            </div>
-
-            <div className="space-y-4 max-w-2xl">
-              <h1 className="text-4xl font-semibold leading-tight tracking-[-0.04em] text-[var(--text-primary)] sm:text-5xl md:text-6xl lg:text-[64px]">
-                Your syllabus.
-                <br />
-                Your semester.
-                <br />
-                <span className="bg-[linear-gradient(135deg,#7c6aff,#a855f7)] bg-clip-text text-transparent">
-                  Instantly organized.
-                </span>
-              </h1>
-              <p className="max-w-xl text-[15px] text-[var(--text-secondary)] sm:text-[17px]">
-                Upload any syllabus PDF and Courseflow automatically tracks every
-                assignment, exam, and deadline — across all your courses.
-              </p>
-            </div>
-
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-              <a
-                href="/auth/signup"
-                className="inline-flex items-center rounded-full bg-[linear-gradient(135deg,#7c6aff,#a855f7)] px-4 py-2 text-xs font-semibold text-white shadow-sm sm:text-sm"
-              >
-                Upload your syllabus free
-              </a>
-              <a
-                href="/auth/signin"
-                className="inline-flex items-center rounded-full border border-[var(--border-subtle)] bg-transparent px-4 py-2 text-xs font-medium text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.04)] hover:text-[var(--text-primary)] sm:text-sm"
-              >
-                Sign in
-              </a>
-            </div>
-
-            <div className="mt-3 flex flex-col gap-1 text-[11px] text-[var(--text-secondary)] sm:text-xs">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[rgba(124,106,255,0.18)] text-[var(--accent)] text-[10px]">
-                  ✓
-                </span>
-                <span>Entire semester organized in seconds</span>
+          <div className="relative mx-auto flex max-w-5xl flex-col gap-12 px-4 pb-16 pt-16 md:flex-row md:items-center md:pb-20 md:pt-20">
+            <AnimatedGroup preset="slide" className="flex-1 space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(99,102,241,0.4)] bg-[rgba(99,102,241,0.08)] px-3 py-1 text-[11px] font-medium text-[var(--text-secondary)]">
+                ✦ Built for university students
               </div>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[rgba(124,106,255,0.18)] text-[var(--accent)] text-[10px]">
-                  ✓
-                </span>
-                <span>Every due date, automatically prioritized</span>
+              <div className="space-y-4">
+                <h1 className="text-3xl font-semibold leading-[1.05] tracking-[-0.05em] text-[var(--text-primary)] sm:text-4xl md:text-5xl lg:text-[52px]">
+                  Your syllabus.
+                  <br />
+                  Your semester.
+                  <br />
+                  <span
+                    style={{
+                      background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                      display: "inline-block",
+                    }}
+                  >
+                    Instantly organized.
+                  </span>
+                </h1>
+                <p className="max-w-md text-[15px] leading-relaxed text-[var(--text-secondary)] sm:text-[16px]">
+                  Upload any syllabus PDF and Courseflow automatically tracks
+                  every assignment, exam, and deadline — across all your
+                  courses.
+                </p>
               </div>
-            </div>
-            {/* 3D mockup */}
-            <div className="mt-10 hidden w-full max-w-xl transform-gpu perspective-[2000px] md:block">
-              <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-4 shadow-[0_40px_120px_rgba(0,0,0,0.9)] [transform:rotateX(18deg)_rotateY(-18deg)]">
-                <div className="mb-3 flex items-center justify-between text-[10px] text-[var(--text-secondary)]">
-                  <span className="h-2 w-16 rounded-full bg-[rgba(255,255,255,0.06)]" />
-                  <span className="h-2 w-8 rounded-full bg-[rgba(255,255,255,0.04)]" />
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  asChild
+                  className="rounded-full px-5 py-2.5 text-sm font-medium text-white"
+                  style={{
+                    background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
+                  }}
+                >
+                  <Link href="/auth/signup">Upload your syllabus free</Link>
+                </Button>
+                <Button variant="ghost" asChild className="rounded-full px-5 py-2.5 text-sm">
+                  <Link href="/auth/signin">Sign in</Link>
+                </Button>
+              </div>
+              <div className="space-y-0.5 text-xs text-[var(--text-muted)]">
+                <p>✓ Entire semester organized in seconds</p>
+                <p>✓ Every due date, automatically prioritized</p>
+              </div>
+            </AnimatedGroup>
+
+            <AnimatedGroup
+              preset="blur-slide"
+              className="flex-1"
+              variants={{
+                container: {
+                  hidden: { opacity: 0, y: 20 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    transition: { staggerChildren: 0.08 },
+                  },
+                },
+              }}
+            >
+              <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[0_40px_80px_rgba(0,0,0,0.6)]">
+                <div className="flex h-8 items-center gap-1.5 border-b border-[var(--border-subtle)] bg-[var(--bg-base)] px-3">
+                  <span className="h-2 w-2 rounded-full bg-[#ef4444]" />
+                  <span className="h-2 w-2 rounded-full bg-[#f59e0b]" />
+                  <span className="h-2 w-2 rounded-full bg-[#22c55e]" />
                 </div>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  <div className="rounded-lg border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.02)] p-2">
-                    <p className="text-[10px] text-[var(--text-muted)]">
-                      Assignments this week
-                    </p>
-                    <p className="mt-2 text-xl font-medium text-[var(--text-primary)]">
-                      7
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.02)] p-2">
-                    <p className="text-[10px] text-[var(--text-muted)]">
+                <div className="flex bg-[var(--bg-base)]">
+                  <div className="flex w-32 flex-col gap-0.5 border-r border-[var(--border-subtle)] bg-[var(--bg-base)] p-2">
+                    <div className="flex h-6 items-center gap-1.5 rounded bg-[rgba(99,102,241,0.15)] px-2 text-[10px] font-medium text-[#6366f1]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#6366f1]" />
+                      Dashboard
+                    </div>
+                    <div className="flex h-6 items-center gap-1.5 rounded px-2 text-[10px] text-[var(--text-muted)]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[rgba(255,255,255,0.08)]" />
                       Courses
-                    </p>
-                    <p className="mt-2 text-xl font-medium text-[var(--text-primary)]">
-                      5
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-[var(--border-subtle)] bg-[rgba(255,255,255,0.02)] p-2">
-                    <p className="text-[10px] text-[var(--text-muted)]">
-                      Planner coverage
-                    </p>
-                    <p className="mt-2 text-xl font-medium text-[var(--text-primary)]">
-                      86%
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-3 rounded-lg border border-dashed border-[var(--border-subtle)] bg-[rgba(255,255,255,0.01)] p-3">
-                  <div className="mb-2 flex items-center justify-between text-[10px] text-[var(--text-secondary)]">
-                    <span>Upcoming this week</span>
-                    <span>View planner</span>
-                  </div>
-                  <div className="space-y-1.5 text-[10px] text-[var(--text-muted)]">
-                    <div className="flex items-center justify-between">
-                      <span>CS 201 · Problem Set 3</span>
-                      <span>Tue</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span>Bio 110 · Lab report</span>
-                      <span>Thu</span>
+                    <div className="flex h-6 items-center gap-1.5 rounded px-2 text-[10px] text-[var(--text-muted)]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[rgba(255,255,255,0.08)]" />
+                      Assignments
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span>History 240 · Midterm</span>
-                      <span>Fri</span>
+                    <div className="flex h-6 items-center gap-1.5 rounded px-2 text-[10px] text-[var(--text-muted)]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[rgba(255,255,255,0.08)]" />
+                      Planner
+                    </div>
+                  </div>
+                  <div className="flex flex-1 flex-col gap-2 bg-[var(--bg-base)] p-3">
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {[
+                        { label: "Courses", value: "3" },
+                        { label: "Assignments", value: "17" },
+                        { label: "Due this week", value: "3" },
+                        { label: "Done", value: "1" },
+                      ].map((stat) => (
+                        <div
+                          key={stat.label}
+                          className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-2"
+                        >
+                          <p className="text-sm font-medium text-[rgba(255,255,255,0.85)]">
+                            {stat.value}
+                          </p>
+                          <p className="text-[9px] text-[rgba(255,255,255,0.3)]">
+                            {stat.label}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-2">
+                      <p className="mb-1.5 text-[9px] font-medium uppercase tracking-[0.18em] text-[rgba(255,255,255,0.25)]">
+                        Upcoming
+                      </p>
+                      <div className="space-y-1">
+                        {[
+                          {
+                            name: "Topic Quiz 6",
+                            date: "Mar 19",
+                            color: "#f59e0b",
+                            priority: "medium",
+                            priorityColor: "#f59e0b",
+                          },
+                          {
+                            name: "Lab 7",
+                            date: "Mar 21",
+                            color: "#f59e0b",
+                            priority: "medium",
+                            priorityColor: "#f59e0b",
+                          },
+                          {
+                            name: "Assignment 5",
+                            date: "Mar 28",
+                            color: "#8b5cf6",
+                            priority: "low",
+                            priorityColor: "#22c55e",
+                          },
+                        ].map((item, idx) => (
+                          <div
+                            key={item.name}
+                            className={`flex items-center gap-2 py-1 ${
+                              idx < 2 ? "border-b border-[rgba(255,255,255,0.04)]" : ""
+                            }`}
+                          >
+                            <span
+                              className="h-1.5 w-1.5 rounded-full"
+                              style={{ backgroundColor: item.color }}
+                            />
+                            <span className="flex-1 text-[10px] text-[rgba(255,255,255,0.7)]">
+                              {item.name}
+                            </span>
+                            <span className="text-[9px] font-mono text-[rgba(255,255,255,0.25)]">
+                              {item.date}
+                            </span>
+                            <span
+                              className="rounded-full px-2 py-0.5 text-[9px] font-medium"
+                              style={{
+                                backgroundColor: `${item.priorityColor}1f`,
+                                color: item.priorityColor,
+                              }}
+                            >
+                              {item.priority}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </AnimatedGroup>
           </div>
         </section>
 
-        {/* SOCIAL PROOF */}
+        {/* STATS BAR */}
         <section className="border-y border-[var(--border-subtle)] bg-[var(--bg-surface)]">
-          <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-4 py-5 text-center sm:flex-row sm:text-left sm:px-6 lg:px-8">
-            <div className="flex flex-col items-center sm:items-start">
-              <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--text-muted)]">
+          <div className="mx-auto flex max-w-5xl divide-x divide-[var(--border-subtle)] px-6">
+            <div className="flex flex-1 flex-col items-center py-6 text-center">
+              <span className="text-[10px] font-medium uppercase tracking-[0.25em] text-[var(--text-muted)]">
                 Upload a syllabus in
               </span>
-              <span className="mt-1 text-sm font-medium text-[var(--text-primary)]">
+              <span className="mt-2 text-sm font-medium text-[var(--text-primary)]">
                 30 seconds
               </span>
             </div>
-            <div className="flex flex-col items-center sm:items-start">
-              <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--text-muted)]">
+            <div className="flex flex-1 flex-col items-center py-6 text-center">
+              <span className="text-[10px] font-medium uppercase tracking-[0.25em] text-[var(--text-muted)]">
                 Assignments tracked
               </span>
-              <span className="mt-1 text-sm font-medium text-[var(--text-primary)]">
-                automatically
+              <span className="mt-2 text-sm font-medium text-[var(--text-primary)]">
+                Automatically
               </span>
             </div>
-            <div className="flex flex-col items-center sm:items-start">
-              <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--text-muted)]">
+            <div className="flex flex-1 flex-col items-center py-6 text-center">
+              <span className="text-[10px] font-medium uppercase tracking-[0.25em] text-[var(--text-muted)]">
                 Works with
               </span>
-              <span className="mt-1 text-sm font-medium text-[var(--text-primary)]">
-                any university
+              <span className="mt-2 text-sm font-medium text-[var(--text-primary)]">
+                Any university
               </span>
             </div>
           </div>
         </section>
 
         {/* FEATURES */}
-        <section className="bg-[var(--bg-base)]">
-          <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-            <div className="mb-8 text-center text-[11px] font-medium uppercase tracking-[0.2em] text-[var(--text-muted)]">
+        <section className="bg-[var(--bg-base)] py-20">
+          <div className="mx-auto max-w-5xl px-6">
+            <div className="mb-12 text-center text-[10px] font-medium uppercase tracking-[0.25em] text-[var(--text-muted)]">
               Why Courseflow
             </div>
-            <BentoGrid className="auto-rows-[18rem] md:auto-rows-[22rem]">
-              <BentoCard
-                name="Upload your syllabus"
-                description="Drop in any PDF. AI reads every due date, exam, and assignment in seconds. Your entire semester organized before your first class."
-                Icon={FileText}
-                href="/auth/signup"
-                cta="Start with a syllabus"
-                className="md:col-span-2 md:row-span-2"
-                background={
-                  <div className="absolute inset-0 overflow-hidden">
-                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(124,106,255,0.3),transparent_60%)]" />
-                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.24),transparent_60%)] mix-blend-screen" />
-                  </div>
-                }
-              />
-              <BentoCard
-                name="Smart priority scoring"
-                description="Every assignment weighted by how much it's worth. Know what actually matters before it's too late."
-                Icon={BarChart2}
-                href="/auth/signup"
-                cta="See how it ranks work"
-                className="md:col-span-1"
-                background={<div />}
-              />
-              <BentoCard
-                name="Weekly planner"
-                description="All your courses, all your deadlines, one clean dashboard. See your entire week at a glance."
-                Icon={CalendarDays}
-                href="/auth/signup"
-                cta="View the planner"
-                className="md:col-span-1"
-                background={<div />}
-              />
-              <BentoCard
-                name="Works with any university"
-                description="If your professor can email it, CourseFlow can read it. Any format, any school, any course."
-                Icon={GraduationCap}
-                href="/auth/signup"
-                cta="Check compatibility"
-                className="md:col-span-3 md:row-span-1"
-                background={<div />}
-              />
-            </BentoGrid>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6">
+                <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-[#7c6aff] to-transparent" />
+                <div className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[rgba(124,106,255,0.1)]">
+                  <FileText size={18} strokeWidth={1.5} color="#7c6aff" />
+                </div>
+                <h3 className="mb-2 text-[14px] font-medium text-[var(--text-primary)]">
+                  Upload your syllabus
+                </h3>
+                <p className="text-[13px] leading-relaxed text-[var(--text-secondary)]">
+                  Drop in a PDF. AI reads every due date, exam, and assignment
+                  instantly. No manual entry ever.
+                </p>
+              </div>
+              <div className="relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6">
+                <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-[#7c6aff] to-transparent" />
+                <div className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[rgba(124,106,255,0.1)]">
+                  <Zap size={18} strokeWidth={1.5} color="#7c6aff" />
+                </div>
+                <h3 className="mb-2 text-[14px] font-medium text-[var(--text-primary)]">
+                  Smart priority scoring
+                </h3>
+                <p className="text-[13px] leading-relaxed text-[var(--text-secondary)]">
+                  Every assignment weighted by how much it&apos;s worth. Know
+                  what actually matters before it&apos;s too late.
+                </p>
+              </div>
+              <div className="relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-6">
+                <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-[#7c6aff] to-transparent" />
+                <div className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[rgba(124,106,255,0.1)]">
+                  <CalendarDays size={18} strokeWidth={1.5} color="#7c6aff" />
+                </div>
+                <h3 className="mb-2 text-[14px] font-medium text-[var(--text-primary)]">
+                  One view for everything
+                </h3>
+                <p className="text-[13px] leading-relaxed text-[var(--text-secondary)]">
+                  All your courses, all deadlines, one clean dashboard. Weekly
+                  planner included.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
       </main>
 
       {/* FOOTER */}
       <footer className="border-t border-[var(--border-subtle)] bg-[var(--bg-base)]">
-        <div className="mx-auto max-w-6xl px-4 py-6 text-center text-[11px] text-[var(--text-muted)]">
+        <div className="mx-auto max-w-5xl px-6 py-8 text-center text-[12px] text-[var(--text-muted)]">
           Courseflow · Built for students · 2026
         </div>
       </footer>
