@@ -86,24 +86,35 @@ async function getAssignmentsAndCourses(): Promise<{
   return { assignments, courses };
 }
 
+function getDueToneClass(dueAtIso: string): string {
+  const due = new Date(dueAtIso);
+  const now = new Date();
+
+  if (Number.isNaN(due.getTime())) return "text-[var(--text-secondary)]";
+
+  if (due.getTime() < now.getTime()) return "text-[#f87171]";
+
+  const in7Days = now.getTime() + 7 * 24 * 60 * 60 * 1000;
+  if (due.getTime() <= in7Days) return "text-[#fbbf24]";
+
+  return "text-[var(--text-secondary)]";
+}
+
 export default async function AssignmentsPage() {
   const { assignments, courses } = await getAssignmentsAndCourses();
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-sm font-medium text-neutral-100">Assignments</h2>
-          <p className="mt-1 text-xs text-neutral-500">
-            Centralize all of your coursework in one place.
-          </p>
-        </div>
+      <header className="flex items-center justify-end">
         <div className="flex flex-wrap items-center gap-2">
-          <button className="inline-flex items-center rounded-full border border-neutral-700 px-3 py-1.5 text-xs font-medium text-neutral-200 hover:border-neutral-500 hover:bg-neutral-900">
+          <button className="inline-flex items-center rounded-lg border border-[var(--border-default)] bg-transparent px-4 py-2 text-sm font-medium text-[var(--text-secondary)]">
             Filter
           </button>
           <details className="group">
-            <summary className="inline-flex cursor-pointer items-center rounded-full bg-sky-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 shadow-sm hover:bg-sky-400">
+            <summary
+              className="inline-flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-medium text-white"
+              style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}
+            >
               Add assignment
             </summary>
             <div className="absolute right-4 z-20 mt-2 w-full max-w-lg rounded-2xl border border-neutral-800 bg-neutral-950/95 p-4 shadow-xl shadow-black/50 sm:right-8">
@@ -244,65 +255,89 @@ export default async function AssignmentsPage() {
           start planning your workload.
         </section>
       ) : (
-        <section className="rounded-xl border border-neutral-800 bg-neutral-900/60">
-          <div className="hidden border-b border-neutral-800 px-4 py-2 text-[11px] text-neutral-400 sm:grid sm:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,0.8fr)_auto] sm:gap-3">
-            <span>Title</span>
-            <span>Course</span>
-            <span>Due</span>
-            <span>Status</span>
-            <span>Priority</span>
+        <section className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+          <div className="hidden bg-[var(--bg-base)] border-b border-[var(--border-subtle)] px-4 py-3 text-[11px] font-medium uppercase tracking-widest text-[var(--text-muted)] sm:grid sm:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,0.8fr)_auto] sm:gap-3">
+            <span className="text-left">Title</span>
+            <span className="text-left">Course</span>
+            <span className="text-left">Due</span>
+            <span className="text-left">Status</span>
+            <span className="text-left">Priority</span>
             <span className="text-right">Actions</span>
           </div>
-          <div className="divide-y divide-neutral-800">
+          <div>
             {assignments.map((assignment) => {
               const course = courses.find(
                 (c) => c.id === assignment.course_id,
               );
+              const dueTone = getDueToneClass(assignment.due_at);
               return (
                 <article
                   key={assignment.id}
-                  className="px-4 py-3 text-xs sm:grid sm:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,0.8fr)_auto] sm:gap-3"
+                  className="group border-b border-[rgba(255,255,255,0.04)] last:border-b-0 px-4 py-3 text-xs transition duration-150 hover:bg-[rgba(255,255,255,0.02)] sm:grid sm:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,0.8fr)_auto] sm:gap-3"
                 >
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-neutral-100">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">
                       {assignment.title}
                     </p>
                     {assignment.description ? (
-                      <p className="text-[11px] text-neutral-400 line-clamp-2">
+                      <p className="truncate whitespace-nowrap text-xs text-[var(--text-muted)] mt-0.5">
                         {assignment.description}
                       </p>
                     ) : null}
-                    <div className="mt-1 flex items-center gap-2 text-[11px] text-neutral-500 sm:hidden">
-                      <span>
+                    <div className="mt-1 flex items-center gap-2 sm:hidden">
+                      <span className="inline-block rounded-md bg-[var(--bg-elevated)] px-2 py-0.5 text-xs text-[var(--text-secondary)]">
                         {course ? course.name : "No course"}{" "}
                         {course?.code ? `· ${course.code}` : ""}
                       </span>
-                      <span>·</span>
-                      <span>{formatDateShort(assignment.due_at)}</span>
+                      <span className={`font-mono text-sm ${dueTone}`}>
+                        {formatDateShort(assignment.due_at)}
+                      </span>
                     </div>
                   </div>
-                  <div className="hidden items-center text-xs text-neutral-300 sm:flex">
+                  <div className="hidden items-center sm:flex">
                     {course ? (
-                      <span>
+                      <span className="inline-block rounded-md bg-[var(--bg-elevated)] px-2 py-0.5 text-xs text-[var(--text-secondary)]">
                         {course.name}
                         {course.code ? ` · ${course.code}` : ""}
                       </span>
                     ) : (
-                      <span className="text-neutral-500">No course</span>
+                      <span className="inline-block rounded-md bg-[var(--bg-elevated)] px-2 py-0.5 text-xs text-[var(--text-secondary)]">
+                        No course
+                      </span>
                     )}
                   </div>
-                  <div className="hidden items-center text-xs text-neutral-300 sm:flex">
-                    {formatDateShort(assignment.due_at)}
+                  <div className="hidden items-center sm:flex">
+                    <span className={`font-mono text-sm ${dueTone}`}>
+                      {formatDateShort(assignment.due_at)}
+                    </span>
                   </div>
-                  <div className="mt-2 flex items-center text-[11px] sm:mt-0 sm:flex">
-                    <StatusBadge status={assignment.status} />
+                  <div className="mt-2 flex items-center sm:mt-0 sm:flex">
+                    <StatusBadge
+                      status={assignment.status}
+                      className={
+                        assignment.status === "not_started"
+                          ? "!bg-[rgba(255,255,255,0.06)] !text-[var(--text-muted)] !px-2.5 !text-xs"
+                          : assignment.status === "in_progress"
+                            ? "!bg-[rgba(99,102,241,0.12)] !text-[#818cf8] !px-2.5 !text-xs"
+                            : "!bg-[rgba(16,185,129,0.12)] !text-[#34d399] !px-2.5 !text-xs"
+                      }
+                    />
                   </div>
-                  <div className="mt-2 flex items-center text-[11px] sm:mt-0 sm:flex">
-                    <PriorityBadge priority={assignment.priority} />
+                  <div className="mt-2 flex items-center sm:mt-0 sm:flex">
+                    <PriorityBadge
+                      priority={assignment.priority}
+                      className={
+                        assignment.priority === "high"
+                          ? "!bg-[rgba(239,68,68,0.12)] !text-[#f87171] !border-0 !px-2.5 !text-xs"
+                          : assignment.priority === "medium"
+                            ? "!bg-[rgba(245,158,11,0.12)] !text-[#fbbf24] !border-0 !px-2.5 !text-xs"
+                            : "!bg-[rgba(16,185,129,0.12)] !text-[#34d399] !border-0 !px-2.5 !text-xs"
+                      }
+                    />
                   </div>
-                  <div className="mt-2 flex items-center justify-end gap-2 sm:mt-0">
-                    <details className="group text-[11px] text-neutral-400">
-                      <summary className="inline-flex cursor-pointer items-center rounded-full border border-neutral-700 px-2.5 py-1 text-[11px] font-medium text-neutral-200 hover:border-neutral-500 hover:bg-neutral-900">
+                  <div className="mt-2 flex items-center justify-end gap-1 opacity-100 transition-opacity duration-150 sm:mt-0 sm:opacity-0 group-hover:opacity-100">
+                    <details className="group text-[11px]">
+                      <summary className="inline-flex cursor-pointer items-center rounded-lg px-2 py-1 text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)]">
                         Edit
                       </summary>
                       <form
@@ -440,7 +475,7 @@ export default async function AssignmentsPage() {
                       <input type="hidden" name="id" value={assignment.id} />
                       <button
                         type="submit"
-                        className="inline-flex items-center rounded-full border border-red-900/60 px-2.5 py-1 text-[11px] font-medium text-red-300 hover:border-red-500/80 hover:bg-red-950/60"
+                        className="inline-flex items-center rounded-lg px-2 py-1 text-xs font-medium text-[rgba(239,68,68,0.5)] hover:text-[#f87171]"
                       >
                         Delete
                       </button>
