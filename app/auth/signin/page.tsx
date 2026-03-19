@@ -3,27 +3,28 @@ import { signInAction } from "../actions";
 
 export default function SignInPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-950 px-4">
-      <div className="w-full max-w-md rounded-2xl border border-neutral-800 bg-neutral-950/80 p-6 shadow-xl shadow-black/50">
-        <div className="mb-6 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/10 text-sm font-semibold text-sky-400">
+    <div className="flex min-h-screen items-center justify-center bg-[var(--bg-base)]">
+      <div className="mx-auto w-full max-w-sm px-6">
+        <div className="mb-4 flex items-center justify-center">
+          <div
+            style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}
+            className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold text-white"
+          >
             CF
           </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold tracking-tight text-neutral-50">
-              Courseflow
-            </span>
-            <span className="text-xs text-neutral-400">
-              Sign in to your workspace
-            </span>
-          </div>
+        </div>
+        <div className="mb-1 text-center text-[18px] font-medium text-[var(--text-primary)]">
+          Courseflow
+        </div>
+        <div className="mb-8 text-center text-[13px] text-[var(--text-secondary)]">
+          Sign in to your workspace
         </div>
 
-        <form className="space-y-4" action={signInAction}>
-          <div className="space-y-1.5">
+        <form action={signInAction}>
+          <div className="mb-4">
             <label
               htmlFor="email"
-              className="text-xs font-medium text-neutral-200"
+              className="text-[12px] mb-1.5 font-medium text-[var(--text-secondary)]"
             >
               Email
             </label>
@@ -32,15 +33,15 @@ export default function SignInPage() {
               name="email"
               type="email"
               autoComplete="email"
-              className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-50 outline-none ring-0 placeholder:text-neutral-600 focus:border-sky-500 focus:outline-none"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[rgba(99,102,241,0.3)] transition duration-150"
               placeholder="you@university.edu"
               required
             />
           </div>
-          <div className="space-y-1.5">
+          <div className="mb-4">
             <label
               htmlFor="password"
-              className="text-xs font-medium text-neutral-200"
+              className="text-[12px] mb-1.5 font-medium text-[var(--text-secondary)]"
             >
               Password
             </label>
@@ -49,24 +50,25 @@ export default function SignInPage() {
               name="password"
               type="password"
               autoComplete="current-password"
-              className="w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-50 outline-none ring-0 placeholder:text-neutral-600 focus:border-sky-500 focus:outline-none"
+              className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[rgba(99,102,241,0.3)] transition duration-150"
               placeholder="••••••••"
               required
             />
           </div>
           <button
             type="submit"
-            className="mt-2 inline-flex w-full items-center justify-center rounded-lg bg-sky-500 px-3 py-2 text-sm font-semibold text-neutral-950 shadow-sm hover:bg-sky-400"
+            className="mt-6 inline-flex w-full items-center justify-center rounded-lg px-3 py-2.5 text-sm font-medium text-white transition duration-150 hover:opacity-90"
+            style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}
           >
             Sign in
           </button>
         </form>
 
-        <p className="mt-4 text-center text-xs text-neutral-500">
+        <p className="mt-4 text-center text-xs text-[var(--text-muted)]">
           Don&apos;t have an account?{" "}
           <Link
             href="/auth/signup"
-            className="font-medium text-sky-400 hover:text-sky-300"
+            className="font-medium text-[#6366f1] hover:underline"
           >
             Create one
           </Link>

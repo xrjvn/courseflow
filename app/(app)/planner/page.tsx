@@ -3,6 +3,7 @@ import type { AssignmentStatus, AssignmentPriority } from "@/lib/types";
 import { startOfWeek, endOfWeek } from "@/lib/date";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PriorityBadge } from "@/components/ui/priority-badge";
+import { FullScreenCalendar } from "@/components/ui/fullscreen-calendar";
 
 type CourseInfo = {
   id: string;
@@ -145,14 +146,98 @@ async function getPlannerData(): Promise<PlannerData> {
 }
 
 export default async function PlannerPage() {
-  const { days, coursesById } = await getPlannerData();
+  const supabase = await createSupabaseServerClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError) {
+    throw new Error(userError.message);
+  }
+
+  const userId = user?.id;
+
+  let calendarData: Array<{
+    day: Date;
+    events: { id: string; name: string; time: string; datetime: string }[];
+  }> = [];
+
+  if (userId) {
+    const [{ data: assignmentsData, error: assignmentsError }, { data: coursesData, error: coursesError }] =
+      await Promise.all([
+        supabase
+          .from("assignments")
+          .select("id, title, due_at, priority, course_id")
+          .eq("user_id", userId),
+        supabase
+          .from("courses")
+          .select("id, name")
+          .eq("user_id", userId),
+      ]);
+
+    if (assignmentsError) {
+      throw new Error(assignmentsError.message);
+    }
+
+    if (coursesError) {
+      throw new Error(coursesError.message);
+    }
+
+    // Fetching courses for completeness (course names can be used later without changing schema).
+    const coursesById: Record<string, string> = {};
+    for (const course of coursesData ?? []) {
+      coursesById[course.id as string] = course.name as string;
+    }
+    void coursesById;
+
+    function localDayKey(date: Date): string {
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const day = date.getDate().toString().padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    const groupedByDay = new Map<
+      string,
+      {
+        day: Date;
+        events: { id: string; name: string; time: string; datetime: string }[];
+      }
+    >();
+
+    for (const row of assignmentsData ?? []) {
+      const dueAt = new Date(row.due_at as string);
+      const key = localDayKey(dueAt);
+
+      const existing =
+        groupedByDay.get(key) ?? {
+          day: new Date(row.due_at as string),
+          events: [],
+        };
+
+      existing.events.push({
+        id: row.id as string,
+        name: row.title as string,
+        time: row.priority as string,
+        datetime: row.due_at as string,
+      });
+
+      groupedByDay.set(key, existing);
+    }
+
+    calendarData = Array.from(groupedByDay.values()).sort(
+      (a, b) => a.day.getTime() - b.day.getTime()
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="h-full flex flex-col gap-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-sm font-medium text-neutral-100">
-            Weekly planner
+            Planner
           </h2>
           <p className="mt-1 text-xs text-neutral-500">
             A simple weekly view that groups assignments by due date for the
@@ -166,55 +251,8 @@ export default async function PlannerPage() {
         </div>
       </header>
 
-      <section className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900/60">
-        <div className="grid grid-cols-7 border-b border-neutral-800 bg-neutral-900/80 text-xs font-medium text-neutral-300">
-          {days.map((day) => (
-            <div key={day.key} className="px-3 py-2 text-center">
-              {day.weekdayShort}
-            </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-7 divide-x divide-neutral-800 text-xs">
-          {days.map((day) => (
-            <div
-              key={day.key}
-              className="min-h-[180px] border-t border-neutral-800 bg-neutral-950/40 p-3 align-top"
-            >
-              <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-neutral-500">
-                {day.label}
-              </p>
-              {day.assignments.length === 0 ? (
-                <div className="mt-1 rounded-lg border border-dashed border-neutral-800 bg-neutral-900/40 p-3 text-[11px] text-neutral-500">
-                  No assignments due on this day.
-                </div>
-              ) : (
-                <ul className="mt-1 space-y-1.5">
-                  {day.assignments.map((assignment) => {
-                    const course = coursesById[assignment.course_id];
-                    return (
-                      <li
-                        key={assignment.id}
-                        className="rounded-lg border border-neutral-800 bg-neutral-950/80 px-2.5 py-2"
-                      >
-                        <p className="text-[12px] font-medium text-neutral-100">
-                          {assignment.title}
-                        </p>
-                        <p className="mt-0.5 text-[11px] text-neutral-500">
-                          {course ? course.name : "No course"}
-                          {course?.code ? ` · ${course.code}` : ""}
-                        </p>
-                        <div className="mt-1 flex items-center gap-2 text-[10px]">
-                          <StatusBadge status={assignment.status} />
-                          <PriorityBadge priority={assignment.priority} />
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          ))}
-        </div>
+      <section className="flex-1 min-h-0">
+        <FullScreenCalendar data={calendarData} />
       </section>
     </div>
   );
