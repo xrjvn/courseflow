@@ -161,7 +161,13 @@ export default async function PlannerPage() {
 
   let calendarData: Array<{
     day: Date;
-    events: { id: string; name: string; time: string; datetime: string }[];
+    events: {
+      id: string;
+      name: string;
+      time: string;
+      datetime: string;
+      course: string;
+    }[];
   }> = [];
 
   if (userId) {
@@ -185,12 +191,10 @@ export default async function PlannerPage() {
       throw new Error(coursesError.message);
     }
 
-    // Fetching courses for completeness (course names can be used later without changing schema).
     const coursesById: Record<string, string> = {};
     for (const course of coursesData ?? []) {
       coursesById[course.id as string] = course.name as string;
     }
-    void coursesById;
 
     function localDayKey(date: Date): string {
       const year = date.getFullYear();
@@ -203,7 +207,13 @@ export default async function PlannerPage() {
       string,
       {
         day: Date;
-        events: { id: string; name: string; time: string; datetime: string }[];
+        events: {
+          id: string;
+          name: string;
+          time: string;
+          datetime: string;
+          course: string;
+        }[];
       }
     >();
 
@@ -222,6 +232,7 @@ export default async function PlannerPage() {
         name: row.title as string,
         time: row.priority as string,
         datetime: row.due_at as string,
+        course: coursesById[(row.course_id as string) ?? ""] ?? "",
       });
 
       groupedByDay.set(key, existing);

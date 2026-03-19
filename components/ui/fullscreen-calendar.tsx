@@ -27,6 +27,7 @@ export type CalendarEvent = {
   name: string
   time: string
   datetime: string
+  course?: string
 }
 
 export type CalendarData = {
@@ -220,6 +221,7 @@ function FullScreenCalendarDay({
     name: string
     time: string
     datetime: string
+    course?: string
   } | null>(null)
   const [tooltipPos, setTooltipPos] = React.useState({ x: 0, y: 0 })
 
@@ -421,6 +423,17 @@ function FullScreenCalendarDay({
           >
             {hoveredEvent.name}
           </div>
+          {hoveredEvent.course && (
+            <div
+              style={{
+                fontSize: "11px",
+                color: "rgba(255,255,255,0.45)",
+                marginBottom: "4px",
+              }}
+            >
+              {hoveredEvent.course}
+            </div>
+          )}
           <div
             style={{
               display: "inline-block",
