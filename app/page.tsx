@@ -108,7 +108,7 @@ export default function Home() {
           <div className="relative mx-auto flex max-w-5xl flex-col gap-12 px-4 pb-16 pt-16 md:flex-row md:items-center md:pb-20 md:pt-20">
             <AnimatedGroup preset="slide" className="flex-1 space-y-6">
               <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(99,102,241,0.4)] bg-[rgba(99,102,241,0.08)] px-3 py-1 text-[11px] font-medium text-[var(--text-secondary)]">
-                ✦ Free for students
+                Free for students
               </div>
               <div className="space-y-4">
                 <h1 className="text-3xl font-semibold leading-[1.05] tracking-[-0.05em] text-[var(--text-primary)] sm:text-4xl md:text-5xl lg:text-[52px]">
@@ -117,9 +117,9 @@ export default function Home() {
                   Never miss a deadline.
                 </h1>
                 <p className="max-w-sm text-[15px] leading-relaxed text-[var(--text-secondary)] sm:text-[16px]">
-                  CourseFlow reads your syllabus in seconds and builds your
-                  entire semester automatically — every assignment, exam, and
-                  due date in one place.
+                  CourseFlow reads your syllabus and instantly organizes every
+                  assignment, exam, and deadline into one clean dashboard. Free
+                  for any university.
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
@@ -132,14 +132,28 @@ export default function Home() {
                 >
                   <Link href="/auth/signup">Get started free</Link>
                 </Button>
-                <Button variant="ghost" asChild className="rounded-full px-5 py-2.5 text-sm">
+                <Button
+                  variant="ghost"
+                  asChild
+                  className="rounded-full px-5 py-2.5 text-sm"
+                  style={{ border: "1px solid rgba(255,255,255,0.15)" }}
+                >
                   <Link href="/auth/signin">Sign in</Link>
                 </Button>
               </div>
-              <div className="space-y-0.5 text-xs text-[var(--text-muted)]">
-                <p>✓ Syllabus to calendar in 30 seconds</p>
-                <p>✓ Zero manual entry — ever</p>
-                <p>✓ Works with any university, PDF or Word</p>
+              <div className="flex flex-col gap-2 mt-6">
+                <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  <span className="mr-2 font-semibold text-[#6366f1]">✓</span>
+                  Syllabus to calendar in 30 seconds
+                </p>
+                <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  <span className="mr-2 font-semibold text-[#6366f1]">✓</span>
+                  Zero manual entry — ever
+                </p>
+                <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  <span className="mr-2 font-semibold text-[#6366f1]">✓</span>
+                  Works with any university, PDF or Word
+                </p>
               </div>
             </AnimatedGroup>
 
@@ -157,7 +171,10 @@ export default function Home() {
                 },
               }}
             >
-              <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[0_40px_80px_rgba(0,0,0,0.6)]">
+              <div
+                className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] shadow-[0_40px_80px_rgba(0,0,0,0.6)]"
+                style={{ transform: "perspective(1200px) rotateY(-3deg) rotateX(1deg)" }}
+              >
                 <div className="flex h-8 items-center gap-1.5 border-b border-[var(--border-subtle)] bg-[var(--bg-base)] px-3">
                   <span className="h-2 w-2 rounded-full bg-[#ef4444]" />
                   <span className="h-2 w-2 rounded-full bg-[#f59e0b]" />
@@ -267,8 +284,19 @@ export default function Home() {
           </div>
         </section>
 
+        <div
+          style={{
+            textAlign: "center",
+            padding: "32px 0 0",
+            fontSize: "13px",
+            color: "rgba(255,255,255,0.25)",
+          }}
+        >
+          Trusted by students at universities worldwide
+        </div>
+
         {/* FEATURES */}
-        <section className="bg-[var(--bg-base)] py-20">
+        <section className="bg-[var(--bg-base)] py-20 pt-16">
           <div className="mx-auto max-w-5xl px-6">
             <div className="mb-12 text-center text-[10px] font-medium uppercase tracking-[0.25em] text-[var(--text-muted)]">
               Why Courseflow
