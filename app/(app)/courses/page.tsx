@@ -120,14 +120,11 @@ export default async function CoursesPage({
         </details>
       ) : null}
       <header className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-sm font-medium text-neutral-100">Courses</h2>
-          <p className="mt-1 text-xs text-neutral-500">
-            Track the classes that drive your workload.
-          </p>
-        </div>
         <details className="group">
-          <summary className="inline-flex cursor-pointer items-center rounded-full bg-sky-500 px-3 py-1.5 text-xs font-semibold text-neutral-950 shadow-sm hover:bg-sky-400">
+          <summary
+            className="inline-flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-medium text-white"
+            style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}
+          >
             Add course
           </summary>
           <div className="absolute right-4 z-20 mt-2 w-full max-w-md rounded-2xl border border-neutral-800 bg-neutral-950/95 p-4 shadow-xl shadow-black/50 sm:right-8">
@@ -221,7 +218,7 @@ export default async function CoursesPage({
         </section>
       ) : (
         <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {courses.map((course) => {
+          {courses.map((course, index) => {
             const syllabus = syllabiByCourseId[course.id];
             const syllabusStatus: SyllabusStatus | "none" =
               syllabus?.status ?? "none";
@@ -229,75 +226,106 @@ export default async function CoursesPage({
             return (
             <article
               key={course.id}
-              className="flex flex-col justify-between rounded-xl border border-neutral-800 bg-neutral-900/60 p-4"
+              className="relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] transition duration-150 hover:border-[var(--border-default)]"
             >
+              <div
+                className="absolute left-0 right-0 top-0 h-[3px]"
+                style={{
+                  background:
+                    index % 3 === 0
+                      ? "linear-gradient(90deg,#6366f1,#8b5cf6)"
+                      : index % 3 === 1
+                        ? "linear-gradient(90deg,#06b6d4,#3b82f6)"
+                        : "linear-gradient(90deg,#f59e0b,#ef4444)",
+                }}
+              />
+              <div className="p-5 pt-6">
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-sm font-medium text-neutral-100">
+                  <h3 className="text-sm font-medium text-[var(--text-primary)]">
                     {course.name}
                   </h3>
-                  <div className="flex items-center gap-2">
-                    {course.code ? (
-                      <span className="rounded-full border border-neutral-700 bg-neutral-900 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-neutral-300">
-                        {course.code}
-                      </span>
-                    ) : null}
-                    <SyllabusStatusBadge status={syllabusStatus} />
-                  </div>
+                  {course.code ? (
+                    <span className="inline-block rounded-md bg-[var(--bg-elevated)] px-2 py-0.5 text-[10px] font-mono text-[var(--text-muted)]">
+                      {course.code}
+                    </span>
+                  ) : null}
                 </div>
                 {course.semester ? (
-                  <p className="text-xs text-neutral-400">{course.semester}</p>
+                  <p className="mt-1 text-xs text-[var(--text-muted)]">{course.semester}</p>
                 ) : (
-                  <p className="text-xs text-neutral-500">
+                  <p className="mt-1 text-xs text-[var(--text-muted)]">
                     No semester set yet.
                   </p>
                 )}
+                <div className="mt-3 inline-block">
+                  {syllabusStatus === "parsed" ? (
+                    <span className="inline-flex items-center rounded-full border-0 bg-[rgba(16,185,129,0.12)] px-2 py-0.5 text-[10px] text-[#34d399]">
+                      Parsed
+                    </span>
+                  ) : syllabusStatus === "none" ? (
+                    <span className="inline-flex items-center rounded-full border-0 bg-[rgba(255,255,255,0.06)] px-2 py-0.5 text-[10px] text-[var(--text-muted)]">
+                      No syllabus
+                    </span>
+                  ) : (
+                    <SyllabusStatusBadge status={syllabusStatus} />
+                  )}
+                </div>
               </div>
               <div className="mt-4 space-y-3">
-                <details className="group text-xs text-neutral-400">
-                  <summary className="inline-flex cursor-pointer items-center rounded-full border border-neutral-700 px-2.5 py-1 text-[11px] font-medium text-neutral-200 hover:border-neutral-500 hover:bg-neutral-900">
-                    Upload syllabus
-                  </summary>
-                  <form
-                    className="mt-3 space-y-2 rounded-lg border border-neutral-800 bg-neutral-950/90 p-3"
-                    action="/api/syllabi/upload"
-                    method="post"
-                    encType="multipart/form-data"
-                  >
-                    <input type="hidden" name="course_id" value={course.id} />
-                    <div className="space-y-1">
-                      <label
-                        htmlFor={`syllabus-${course.id}`}
-                        className="text-[11px] font-medium text-neutral-200"
-                      >
-                        Syllabus PDF
-                      </label>
-                      <input
-                        id={`syllabus-${course.id}`}
-                        name="file"
-                        type="file"
-                        accept="application/pdf,.pdf"
-                        required
-                        className="block w-full text-[11px] text-neutral-300 file:mr-3 file:rounded-full file:border file:border-neutral-700 file:bg-neutral-900 file:px-3 file:py-1.5 file:text-[11px] file:font-medium file:text-neutral-200 hover:file:border-neutral-500 hover:file:bg-neutral-800"
-                      />
-                      <p className="text-[11px] text-neutral-500">
-                        Uploading a new file will replace the existing syllabus.
-                      </p>
-                    </div>
-                    <div className="flex justify-end pt-1">
-                      <button
-                        type="submit"
-                        className="inline-flex items-center rounded-full bg-sky-500 px-3 py-1.5 text-[11px] font-semibold text-neutral-950 shadow-sm hover:bg-sky-400"
-                      >
-                        Upload PDF
-                      </button>
-                    </div>
-                  </form>
-                </details>
+                {syllabusStatus === "none" || syllabusStatus === "failed" ? (
+                  <details className="group text-xs text-neutral-400">
+                    <summary
+                      className={
+                        syllabusStatus === "failed"
+                          ? "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-[rgba(239,68,68,0.3)] py-2.5 text-xs text-[#f87171] transition duration-150 hover:border-[#f87171] hover:text-[#f87171]"
+                          : "inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--border-default)] py-2.5 text-xs text-[var(--text-secondary)] transition duration-150 hover:border-[#6366f1] hover:text-[#6366f1]"
+                      }
+                    >
+                      {syllabusStatus === "failed" ? "↑ Retry upload" : "↑ Upload syllabus"}
+                    </summary>
+                    <form
+                      className="mt-3 space-y-2 rounded-lg border border-neutral-800 bg-neutral-950/90 p-3"
+                      action="/api/syllabi/upload"
+                      method="post"
+                      encType="multipart/form-data"
+                    >
+                      <input type="hidden" name="course_id" value={course.id} />
+                      <div className="space-y-1">
+                        <label
+                          htmlFor={`syllabus-${course.id}`}
+                          className="text-[11px] font-medium text-neutral-200"
+                        >
+                          Syllabus PDF
+                        </label>
+                        <input
+                          id={`syllabus-${course.id}`}
+                          name="file"
+                          type="file"
+                          accept="application/pdf,.pdf"
+                          required
+                          className="block w-full text-[11px] text-neutral-300 file:mr-3 file:rounded-full file:border file:border-neutral-700 file:bg-neutral-900 file:px-3 file:py-1.5 file:text-[11px] file:font-medium file:text-neutral-200 hover:file:border-neutral-500 hover:file:bg-neutral-800"
+                        />
+                        <p className="text-[11px] text-neutral-500">
+                          Uploading a new file will replace the existing syllabus.
+                        </p>
+                      </div>
+                      <div className="flex justify-end pt-1">
+                        <button
+                          type="submit"
+                          className="inline-flex items-center rounded-full bg-sky-500 px-3 py-1.5 text-[11px] font-semibold text-neutral-950 shadow-sm hover:bg-sky-400"
+                        >
+                          Upload PDF
+                        </button>
+                      </div>
+                    </form>
+                  </details>
+                ) : null}
 
+                <div className="mt-4 border-t border-[var(--border-subtle)] pt-3">
                 <div className="flex items-center justify-between gap-2">
                   <details className="group w-full text-xs text-neutral-400">
-                  <summary className="inline-flex cursor-pointer items-center rounded-full border border-neutral-700 px-2.5 py-1 text-[11px] font-medium text-neutral-200 hover:border-neutral-500 hover:bg-neutral-900">
+                  <summary className="inline-flex cursor-pointer items-center px-2 py-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]">
                     Edit
                   </summary>
                   <form
@@ -382,11 +410,13 @@ export default async function CoursesPage({
                   <input type="hidden" name="id" value={course.id} />
                   <button
                     type="submit"
-                    className="inline-flex items-center rounded-full border border-red-900/60 px-2.5 py-1 text-[11px] font-medium text-red-300 hover:border-red-500/80 hover:bg-red-950/60"
+                    className="inline-flex items-center px-2 py-1 text-xs text-[rgba(239,68,68,0.4)] hover:text-[#f87171]"
                   >
                     Delete
                   </button>
                 </form>
+              </div>
+              </div>
               </div>
               </div>
             </article>
