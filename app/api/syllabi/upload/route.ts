@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { extractTextFromPdf, generateSyllabusSuggestions } from "@/lib/ai/syllabus";
+import {
+  extractTextFromPdf,
+  extractTextFromDocx,
+  generateSyllabusSuggestions,
+} from "@/lib/ai/syllabus";
 import { importSyllabusSuggestionsForCourse } from "@/app/(app)/assignments/actions";
 
 export const runtime = "nodejs";
@@ -9,10 +13,18 @@ export const runtime = "nodejs";
 const SYLLABI_BUCKET = "syllabi";
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10MB
 
-function isPdfFile(file: File): boolean {
-  if (file.type === "application/pdf") return true;
-  const name = file.name.toLowerCase();
-  return name.endsWith(".pdf");
+function isValidFile(file: File): { valid: boolean; type: "pdf" | "docx" | null } {
+  if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+    return { valid: true, type: "pdf" };
+  }
+  if (
+    file.type ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+    file.name.toLowerCase().endsWith(".docx")
+  ) {
+    return { valid: true, type: "docx" };
+  }
+  return { valid: false, type: null };
 }
 
 function jsonError(message: string, status = 400) {
@@ -47,8 +59,9 @@ export async function POST(request: Request) {
     return jsonError("Missing file", 400);
   }
 
-  if (!isPdfFile(file)) {
-    return jsonError("File must be a PDF", 415);
+  const fileCheck = isValidFile(file);
+  if (!fileCheck.valid) {
+    return jsonError("File must be a PDF or Word document (.docx)", 415);
   }
 
   if (file.size > MAX_FILE_BYTES) {
@@ -77,12 +90,17 @@ export async function POST(request: Request) {
 
   // Use a stable path so re-uploads replace the same object.
   const userId = user.id as string;
-  const storagePath = `${userId}/${courseId}/syllabus.pdf`;
+  const fileExt = fileCheck.type === "docx" ? "docx" : "pdf";
+  const storagePath = `${userId}/${courseId}/syllabus.${fileExt}`;
+  const contentType =
+    fileCheck.type === "docx"
+      ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      : "application/pdf";
 
   const { error: uploadError } = await admin.storage
     .from(SYLLABI_BUCKET)
     .upload(storagePath, file, {
-      contentType: "application/pdf",
+      contentType,
       upsert: true,
     });
 
@@ -90,7 +108,7 @@ export async function POST(request: Request) {
     return jsonError(uploadError.message, 400);
   }
 
-  // Attempt parsing: download PDF, extract text, call AI, store suggestions.
+    // Attempt parsing: download file, extract text, call AI, store suggestions.
   try {
     const { data: downloadData, error: downloadError } = await admin.storage
       .from(SYLLABI_BUCKET)
@@ -101,7 +119,10 @@ export async function POST(request: Request) {
     }
 
     const buffer = Buffer.from(await downloadData.arrayBuffer());
-    const rawText = await extractTextFromPdf(buffer);
+    const rawText =
+      fileCheck.type === "docx"
+        ? await extractTextFromDocx(Buffer.from(buffer))
+        : await extractTextFromPdf(buffer);
     const suggestions = await generateSyllabusSuggestions(rawText);
 
     // Select existing syllabi row for this user + course
@@ -124,7 +145,7 @@ export async function POST(request: Request) {
       course_id: courseId,
       storage_path: storagePath,
       original_filename: file.name,
-      mime_type: "application/pdf",
+      mime_type: contentType,
       status: "parsed" as const,
       parsed_at: new Date().toISOString(),
       parsed_suggestions: suggestions,
@@ -187,7 +208,7 @@ export async function POST(request: Request) {
       course_id: courseId,
       storage_path: storagePath,
       original_filename: file.name,
-      mime_type: "application/pdf",
+      mime_type: contentType,
       status: "failed" as const,
       parsed_at: null,
       parsed_suggestions: null,

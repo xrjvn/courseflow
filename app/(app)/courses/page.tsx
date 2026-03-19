@@ -302,7 +302,7 @@ export default async function CoursesPage({
                           id={`syllabus-${course.id}`}
                           name="file"
                           type="file"
-                          accept="application/pdf,.pdf"
+                        accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                           required
                           className="block w-full text-[11px] text-neutral-300 file:mr-3 file:rounded-full file:border file:border-neutral-700 file:bg-neutral-900 file:px-3 file:py-1.5 file:text-[11px] file:font-medium file:text-neutral-200 hover:file:border-neutral-500 hover:file:bg-neutral-800"
                         />
