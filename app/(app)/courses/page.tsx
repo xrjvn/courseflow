@@ -220,8 +220,7 @@ export default async function CoursesPage({
         <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {courses.map((course, index) => {
             const syllabus = syllabiByCourseId[course.id];
-            const syllabusStatus: SyllabusStatus | "none" =
-              syllabus?.status ?? "none";
+            const syllabusStatus = syllabus?.status;
 
             return (
             <article
@@ -263,7 +262,7 @@ export default async function CoursesPage({
                     <span className="inline-flex items-center rounded-full border-0 bg-[rgba(16,185,129,0.12)] px-2 py-0.5 text-[10px] text-[#34d399]">
                       Parsed
                     </span>
-                  ) : syllabusStatus === "none" ? (
+                  ) : !syllabusStatus ? (
                     <span className="inline-flex items-center rounded-full border-0 bg-[rgba(255,255,255,0.06)] px-2 py-0.5 text-[10px] text-[var(--text-muted)]">
                       No syllabus
                     </span>
@@ -273,7 +272,7 @@ export default async function CoursesPage({
                 </div>
               </div>
               <div className="mt-4 space-y-3">
-                {syllabusStatus === "none" || syllabusStatus === "failed" ? (
+                {!syllabusStatus || syllabusStatus === "failed" ? (
                   <details className="group text-xs text-neutral-400">
                     <summary
                       className={
